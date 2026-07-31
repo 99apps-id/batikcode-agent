@@ -49,7 +49,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          lfs: true
+          # Deliberately no `lfs: true`. Everything under LFS here is copilot
+          # simulation-test cache, which the server package excludes anyway —
+          # fetching it only makes checkout fail when those objects were never
+          # pushed to this fork.
+          lfs: false
 
       - name: Free disk space
         run: |
