@@ -127,6 +127,19 @@ jobs:
           ONNXRUNTIME_NODE_INSTALL: skip
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Add swap space
+        run: |
+          # The runners have 15Gi RAM but no swap to speak of. A compile of the
+          # whole src tree peaks past 6GB of V8 heap, and if the native tsgo
+          # typechecker child overlaps that spike the kernel can OOM-kill the
+          # job (seen as "The runner has received a shutdown signal"). An 8Gi
+          # swapfile gives the kernel room to page out instead of killing us.
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Build server
         run: |
           set -e
@@ -136,7 +149,10 @@ jobs:
           # while holding 12k classes at once — the runner kills the job before it
           # finishes. Mangling only shortens symbol names, so skipping it costs
           # nothing but output size.
-          GULP="node --experimental-strip-types --max-old-space-size=6144 ./node_modules/gulp/bin/gulp.js"
+          #
+          # The compile phase needs more than 6GB of V8 heap for the src tree;
+          # 8192 is the upstream default and fits inside the 15Gi of RAM.
+          GULP="node --experimental-strip-types --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js"
           for phase in \
             compile-build-without-mangling \
             compile-non-native-extensions-build \
