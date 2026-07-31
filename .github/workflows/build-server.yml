@@ -129,15 +129,17 @@ jobs:
 
       - name: Add swap space
         run: |
-          # The runners have 15Gi RAM but no swap to speak of. A compile of the
-          # whole src tree peaks past 6GB of V8 heap, and if the native tsgo
-          # typechecker child overlaps that spike the kernel can OOM-kill the
-          # job (seen as "The runner has received a shutdown signal"). An 8Gi
-          # swapfile gives the kernel room to page out instead of killing us.
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          # The runners ship 15Gi RAM and already mount 3Gi of swap at
+          # /swapfile, so that path is busy. Add 8Gi more under a unique path
+          # as a safety net: a compile of the whole src tree peaks past 6GB of
+          # V8 heap, and if the native tsgo typechecker child overlaps that
+          # spike the kernel can OOM-kill the job (seen as "The runner has
+          # received a shutdown signal").
+          sudo fallocate -l 8G /mnt/batikcode-swapfile 2>/dev/null \
+            || sudo dd if=/dev/zero of=/mnt/batikcode-swapfile bs=1M count=8192 status=none
+          sudo chmod 600 /mnt/batikcode-swapfile
+          sudo mkswap /mnt/batikcode-swapfile
+          sudo swapon /mnt/batikcode-swapfile
           free -h
 
       - name: Build server
