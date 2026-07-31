@@ -37,9 +37,12 @@ jobs:
           - platform: linux
             arch: x64
             runner: ubuntu-24.04
+          # arm64 builds cross-compile on an x64 host: the sysroot compilers in
+          # build/azure-pipelines (aarch64-linux-gnu-gcc etc.) are x86_64-hosted
+          # binaries, so a native arm64 runner would fail with "Exec format error".
           - platform: linux
             arch: arm64
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-24.04
 
     env:
       NPM_ARCH: ${{ matrix.arch }}
