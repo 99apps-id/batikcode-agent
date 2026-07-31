@@ -1,0 +1,1 @@
+These sources are copied from the BatikCode bracket pair colorization feature.

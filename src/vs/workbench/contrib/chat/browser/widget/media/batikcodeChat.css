@@ -1,0 +1,62 @@
+/*---------------------------------------------------------------------------------------------
+ *  BatikCode chat identity.
+ *
+ *  Layered on top of chat.css rather than edited into it, so rebasing onto
+ *  upstream stays a clean merge of one file we own.
+ *
+ *  Two rules govern everything here:
+ *
+ *  1. Colour resolves through workbench theme tokens, never literals. Under the
+ *     BatikCode themes `focusBorder` is terracotta and `textLink-foreground` is
+ *     gold, so the panel reads as batik — while a user on Solarized still gets a
+ *     coherent panel in their own palette.
+ *  2. Radii resolve through the `--vscode-cornerRadius-*` ramp. A literal pixel
+ *     value would silently drop this surface out of the control tier.
+ *
+ *  Upstream already right-aligns the request into a bubble, so that shape is not
+ *  reinvented here. What it lacks — and what a long agent turn needs — is a way
+ *  to find the answer that is currently streaming.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ── The live response carries a rail ───────────────────────────────────────
+ *
+ * During a long agentic turn the transcript scrolls past several settled
+ * responses. A single gold rail marks the one still being written, so the eye
+ * returns to the live edge instead of re-reading to find it. It is drawn as an
+ * inset shadow rather than a border so nothing reflows when it appears, and it
+ * is scoped to the panel layout (the same `:not()` guard upstream uses for the
+ * bubble treatment) so inline and quick chat are untouched.
+ */
+.interactive-session:not(.chat-widget > .interactive-session) {
+
+	.interactive-item-container.interactive-response.chat-most-recent-response {
+		box-shadow: inset 2px 0 0 0 var(--vscode-textLink-foreground);
+		border-top-left-radius: var(--vscode-cornerRadius-small);
+		border-bottom-left-radius: var(--vscode-cornerRadius-small);
+	}
+
+	/* Once a response settles it is one of many; only the live turn is marked. */
+	.interactive-item-container.interactive-response:not(.chat-most-recent-response) {
+		box-shadow: none;
+	}
+
+	/* ── The request bubble gets a batik edge ──────────────────────────────
+	 *
+	 * The bubble is right-aligned, so the accent goes on the right edge where
+	 * the utterance ends. Inset again: a real border would change the bubble's
+	 * box and shift the text inside it.
+	 */
+	.interactive-item-container.interactive-request .value .rendered-markdown {
+		box-shadow: inset -2px 0 0 0 var(--vscode-focusBorder);
+	}
+}
+
+/* ── Provider attribution stays legible ────────────────────────────────────
+ *
+ * The picker labels a model with the provider that actually serves it; the
+ * badge that carries this in the transcript is secondary information, so it
+ * takes the description ramp rather than competing with the response text.
+ */
+.interactive-session .interactive-item-container .header .username + .detail-container {
+	color: var(--vscode-descriptionForeground);
+}

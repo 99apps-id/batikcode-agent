@@ -1,0 +1,247 @@
+{
+	"nameShort": "BatikCode",
+	"nameLong": "BatikCode IDE",
+	"applicationName": "batikcode",
+	"dataFolderName": ".batikcode",
+	"sharedDataFolderName": ".batikcode-shared",
+	"win32MutexName": "batikcode",
+	"licenseName": "MIT",
+	"licenseUrl": "https://github.com/microsoft/vscode/blob/1.130.0/LICENSE.txt",
+	"serverLicenseUrl": "https://github.com/microsoft/vscode/blob/1.130.0/LICENSE.txt",
+	"serverGreeting": [],
+	"serverLicense": [],
+	"serverLicensePrompt": "",
+	"serverApplicationName": "batikcode-server",
+	"serverDataFolderName": ".batikcode-server",
+	"serverDownloadUrlTemplate": "https://github.com/99apps-id/batikcode/releases/download/v${version}/batikcode-server-${os}-${arch}.tar.gz",
+	"tunnelApplicationName": "batikcode-tunnel",
+	"win32DirName": "BatikCode",
+	"win32NameVersion": "BatikCode IDE",
+	"win32RegValueName": "BatikCode",
+	"win32x64AppId": "{{5B546BBB-A84F-4145-AEC0-B8BDFA72CB58}",
+	"win32arm64AppId": "{{52CB24FB-8031-4BA2-A1CD-C305CD6AF008}",
+	"win32x64UserAppId": "{{989BBD17-4125-4F38-B2B9-37E6A4EDC572}",
+	"win32arm64UserAppId": "{{3DE64B94-13E6-4CB7-8FD3-A369174B0B3C}",
+	"win32AppUserModelId": "BatikCode.IDE",
+	"win32ShellNameShort": "Batik&Code",
+	"win32TunnelServiceMutex": "batikcode-tunnelservice",
+	"win32TunnelMutex": "batikcode-tunnel",
+	"darwinBundleIdentifier": "id.batikcode.ide",
+	"darwinProfileUUID": "D8C43A8A-E35C-4069-B2A0-229936E3D402",
+	"darwinProfilePayloadUUID": "C1473B9F-A2B0-487B-8384-CF612D02DD44",
+	"linuxIconName": "batikcode",
+	"licenseFileName": "LICENSE.txt",
+	"reportIssueUrl": "https://github.com/99apps-id/batikcode/issues/new",
+	"nodejsArtifactFeed": "",
+	"electronArtifactFeed": "",
+	"urlProtocol": "batikcode",
+	"extensionsGallery": {
+		"serviceUrl": "https://open-vsx.org/vscode/gallery",
+		"itemUrl": "https://open-vsx.org/vscode/item",
+		"publisherUrl": "https://open-vsx.org/namespace",
+		"controlUrl": "https://raw.githubusercontent.com/EclipseFdn/publish-extensions/refs/heads/master/extension-control/extensions.json"
+	},
+	"defaultChatAgent": {
+		"skipSetup": true,
+		"providerExtensionId": "vscode.github-authentication",
+		"extensionId": "GitHub.copilot",
+		"chatExtensionId": "GitHub.copilot-chat",
+		"chatExtensionOutputId": "GitHub.copilot-chat.GitHub Copilot Chat.log",
+		"chatExtensionOutputExtensionStateCommand": "github.copilot.debug.extensionState",
+		"documentationUrl": "https://aka.ms/github-copilot-overview",
+		"termsStatementUrl": "https://aka.ms/github-copilot-terms-statement",
+		"privacyStatementUrl": "https://aka.ms/github-copilot-privacy-statement",
+		"skusDocumentationUrl": "https://aka.ms/github-copilot-plans",
+		"publicCodeMatchesUrl": "https://aka.ms/github-copilot-match-public-code",
+		"manageSettingsUrl": "https://aka.ms/github-copilot-settings",
+		"managePlanUrl": "https://aka.ms/github-copilot-manage-plan",
+		"upgradePlanUrl": "https://aka.ms/github-copilot-upgrade-plan",
+		"signUpUrl": "https://aka.ms/github-sign-up",
+		"provider": {
+			"default": {
+				"id": "github",
+				"name": "GitHub"
+			},
+			"enterprise": {
+				"id": "github-enterprise",
+				"name": "GitHub Enterprise"
+			}
+		},
+		"providerUriSetting": "github-enterprise.uri",
+		"providerScopes": [
+			[
+				"read:user",
+				"user:email",
+				"repo",
+				"workflow"
+			],
+			[
+				"user:email"
+			],
+			[
+				"read:user"
+			]
+		],
+		"entitlementUrl": "https://api.github.com/copilot_internal/user",
+		"entitlementSignupLimitedUrl": "https://api.github.com/copilot_internal/subscribe_limited_user",
+		"tokenEntitlementUrl": "https://api.github.com/copilot_internal/v2/token",
+		"managedSettingsUrl": "https://api.github.com/copilot_internal/managed_settings",
+		"mcpRegistryDataUrl": "https://api.github.com/copilot/mcp_registry",
+		"chatQuotaExceededContext": "github.copilot.chat.quotaExceeded",
+		"completionsQuotaExceededContext": "github.copilot.completions.quotaExceeded",
+		"walkthroughCommand": "github.copilot.open.walkthrough",
+		"completionsMenuCommand": "github.copilot.toggleStatusMenu",
+		"chatRefreshTokenCommand": "github.copilot.refreshToken",
+		"generateCommitMessageCommand": "github.copilot.git.generateCommitMessage",
+		"resolveMergeConflictsCommand": "github.copilot.git.resolveMergeConflicts",
+		"completionsAdvancedSetting": "github.copilot.advanced",
+		"completionsEnablementSetting": "github.copilot.enable",
+		"nextEditSuggestionsSetting": "github.copilot.nextEditSuggestions.enabled"
+	},
+	"builtInExtensions": [
+		{
+			"name": "ms-vscode.js-debug-companion",
+			"version": "1.1.3",
+			"sha256": "7380a890787452f14b2db7835dfa94de538caf358ebc263f9d46dd68ac52de93",
+			"repo": "https://github.com/microsoft/vscode-js-debug-companion",
+			"metadata": {
+				"id": "99cb0b7f-7354-4278-b8da-6cc79972169d",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		},
+		{
+			"name": "ms-vscode.js-debug",
+			"version": "1.117.0",
+			"sha256": "854eeb8a785b1f41ba2bd02d7ccd4fdbe10021b61473293973c7e96d036c7fb8",
+			"repo": "https://github.com/microsoft/vscode-js-debug",
+			"metadata": {
+				"id": "25629058-ddac-4e17-abba-74678e126c5d",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		},
+		{
+			"name": "ms-vscode.vscode-js-profile-table",
+			"version": "1.0.10",
+			"sha256": "7361748ddf9fd09d8a2ed1f2a2d7376a2cf9aae708692820b799708385c38e08",
+			"repo": "https://github.com/microsoft/vscode-js-profile-visualizer",
+			"metadata": {
+				"id": "7e52b41b-71ad-457b-ab7e-0620f1fc4feb",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		}
+	],
+	"onboardingKeymaps": [
+		{
+			"id": "vscode",
+			"label": "BatikCode",
+			"description": "Default keyboard mapping"
+		},
+		{
+			"id": "sublime",
+			"label": "Sublime Text",
+			"extensionId": "ms-vscode.sublime-keybindings",
+			"description": "Keyboard mapping from Sublime Text"
+		},
+		{
+			"id": "intellij",
+			"label": "IntelliJ / JetBrains",
+			"extensionId": "k--kato.intellij-idea-keybindings",
+			"description": "Keyboard mapping from IntelliJ IDEA"
+		},
+		{
+			"id": "vim",
+			"label": "Vim",
+			"extensionId": "vscodevim.vim",
+			"description": "Vim modal editing"
+		},
+		{
+			"id": "eclipse",
+			"label": "Eclipse",
+			"extensionId": "alphabotsec.vscode-eclipse-keybindings",
+			"description": "Keyboard mapping from Eclipse"
+		},
+		{
+			"id": "notepadpp",
+			"label": "Notepad++",
+			"extensionId": "ms-vscode.notepadplusplus-keybindings",
+			"description": "Keyboard mapping from Notepad++"
+		}
+	],
+	"onboardingThemes": [
+		{
+			"id": "batikcode-dark",
+			"label": "BatikCode Dark",
+			"themeId": "BatikCode Dark",
+			"type": "dark"
+		},
+		{
+			"id": "batikcode-light",
+			"label": "BatikCode Light",
+			"themeId": "BatikCode Light",
+			"type": "light"
+		},
+		{
+			"id": "dark-2026",
+			"label": "Dark 2026",
+			"themeId": "Dark 2026",
+			"type": "dark"
+		},
+		{
+			"id": "hc-dark",
+			"label": "Dark High Contrast",
+			"themeId": "Default High Contrast",
+			"type": "hcDark"
+		},
+		{
+			"id": "solarized-dark",
+			"label": "Solarized Dark",
+			"themeId": "Solarized Dark",
+			"type": "dark"
+		},
+		{
+			"id": "light-2026",
+			"label": "Light 2026",
+			"themeId": "Light 2026",
+			"type": "light"
+		},
+		{
+			"id": "hc-light",
+			"label": "Light High Contrast",
+			"themeId": "Default High Contrast Light",
+			"type": "hcLight"
+		},
+		{
+			"id": "solarized-light",
+			"label": "Solarized Light",
+			"themeId": "Solarized Light",
+			"type": "light"
+		}
+	],
+	"builtInExtensionsEnabledWithAutoUpdates": [],
+	"sessionsWindowAllowedExtensions": [],
+	"defaultSettings": {
+		"workbench.colorTheme": "BatikCode Dark",
+		"workbench.activityBar.location": "default",
+		"editor.fontFamily": "'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace",
+		"telemetry.telemetryLevel": "off",
+		"extensions.autoUpdate": false
+	}
+}

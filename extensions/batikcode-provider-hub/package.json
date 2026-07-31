@@ -1,0 +1,245 @@
+{
+  "name": "batikcode-provider-hub",
+  "displayName": "BatikCode Account & AI Provider Hub",
+  "description": "Connect accounts and configure AI providers from one secure BatikCode surface.",
+  "publisher": "batikcode",
+  "license": "MIT",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.130.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "enabledApiProposals": [
+    "chatParticipantAdditions",
+    "defaultChatParticipant"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:batikcode.providerRouter.routeChat",
+    "onChatParticipant:batikcode.chat"
+  ],
+  "main": "./out/extension.js",
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "External AI requests and tool calling require a trusted workspace."
+    }
+  },
+  "contributes": {
+    "languageModelChatProviders": [
+      {
+        "vendor": "batikcode-codex",
+        "displayName": "OpenAI Codex"
+      },
+      {
+        "vendor": "batikcode-gemini-cli",
+        "displayName": "Gemini CLI"
+      },
+      {
+        "vendor": "batikcode-antigravity",
+        "displayName": "Antigravity (Google)"
+      },
+      {
+        "vendor": "batikcode-openai",
+        "displayName": "OpenAI"
+      },
+      {
+        "vendor": "batikcode-anthropic",
+        "displayName": "Anthropic"
+      },
+      {
+        "vendor": "batikcode-gemini",
+        "displayName": "Google Gemini"
+      },
+      {
+        "vendor": "batikcode-openrouter",
+        "displayName": "OpenRouter"
+      },
+      {
+        "vendor": "batikcode-xai",
+        "displayName": "xAI"
+      },
+      {
+        "vendor": "batikcode-azure",
+        "displayName": "Azure OpenAI"
+      },
+      {
+        "vendor": "batikcode-ollama",
+        "displayName": "Ollama"
+      },
+      {
+        "vendor": "batikcode-deepseek",
+        "displayName": "DeepSeek"
+      },
+      {
+        "vendor": "batikcode-groq",
+        "displayName": "Groq"
+      },
+      {
+        "vendor": "batikcode-mistral",
+        "displayName": "Mistral AI"
+      },
+      {
+        "vendor": "batikcode-together",
+        "displayName": "Together AI"
+      },
+      {
+        "vendor": "batikcode-qwen",
+        "displayName": "Alibaba DashScope (Qwen)"
+      },
+      {
+        "vendor": "batikcode-fireworks",
+        "displayName": "Fireworks AI"
+      },
+      {
+        "vendor": "batikcode-cerebras",
+        "displayName": "Cerebras"
+      },
+      {
+        "vendor": "batikcode-nvidia",
+        "displayName": "NVIDIA NIM"
+      },
+      {
+        "vendor": "batikcode-githubmodels",
+        "displayName": "GitHub Models"
+      },
+      {
+        "vendor": "batikcode-moonshot",
+        "displayName": "Moonshot (Kimi)"
+      },
+      {
+        "vendor": "batikcode-zhipu-glm",
+        "displayName": "Zhipu GLM"
+      },
+      {
+        "vendor": "batikcode-minimax",
+        "displayName": "MiniMax"
+      },
+      {
+        "vendor": "batikcode-siliconflow",
+        "displayName": "SiliconFlow"
+      },
+      {
+        "vendor": "batikcode-perplexity",
+        "displayName": "Perplexity"
+      },
+      {
+        "vendor": "batikcode-deepinfra",
+        "displayName": "DeepInfra"
+      },
+      {
+        "vendor": "batikcode-sambanova",
+        "displayName": "SambaNova"
+      },
+      {
+        "vendor": "batikcode-customendpoint",
+        "displayName": "Custom endpoint"
+      }
+    ],
+    "chatParticipants": [
+      {
+        "id": "batikcode.chat",
+        "name": "batikcode",
+        "fullName": "BatikCode",
+        "description": "Chat with any connected BatikCode model provider.",
+        "isDefault": true,
+        "locations": [
+          "panel"
+        ],
+        "modes": [
+          "ask",
+          "edit",
+          "agent"
+        ],
+        "commands": []
+      }
+    ],
+    "configurationDefaults": {
+      "workbench.activityBar.location": "default",
+      "workbench.activityBar.autoHide": false
+    },
+    "commands": [
+      {
+        "command": "batikcode.providerHub.open",
+        "title": "Open Account & AI Provider Hub",
+        "category": "BatikCode",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "batikcode.providerHub.connectGitHub",
+        "title": "Connect GitHub",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.providerHub.connectCopilot",
+        "title": "Connect GitHub Copilot",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.providerHub.manageOAuthBootstrap",
+        "title": "Manage OAuth Test Bootstrap",
+        "category": "BatikCode",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "batikcode.providerRouter.configure",
+        "title": "Configure API Provider",
+        "category": "BatikCode",
+        "icon": "$(key)"
+      },
+      {
+        "command": "batikcode.providerRouter.test",
+        "title": "Test Provider Routing",
+        "category": "BatikCode",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "batikcode.providerHub.diagnose",
+        "title": "Diagnose Chat Models",
+        "category": "BatikCode",
+        "icon": "$(pulse)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "batikcode.providerHub.open"
+        },
+        {
+          "command": "batikcode.providerHub.connectGitHub"
+        },
+        {
+          "command": "batikcode.providerHub.connectCopilot"
+        },
+        {
+          "command": "batikcode.providerHub.manageOAuthBootstrap"
+        },
+        {
+          "command": "batikcode.providerRouter.configure"
+        },
+        {
+          "command": "batikcode.providerRouter.test"
+        },
+        {
+          "command": "batikcode.providerHub.diagnose"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "gulp compile-extension:batikcode-provider-hub",
+    "watch": "gulp watch-extension:batikcode-provider-hub",
+    "test": "node --test out/test/providerProtocol.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/99apps-id/batikcode.git"
+  }
+}

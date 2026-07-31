@@ -1,0 +1,215 @@
+{
+  "name": "batikcode-remote-control",
+  "displayName": "BatikCode Remote Explorer & Telegram",
+  "description": "Remote host exploration and secure Telegram-controlled coding for BatikCode.",
+  "publisher": "batikcode",
+  "license": "MIT",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.130.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Telegram remote coding and SSH commands require a trusted workspace."
+    }
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "batikcode-remote-explorer",
+          "title": "Remote Explorer",
+          "icon": "resources/remote.svg"
+        }
+      ]
+    },
+    "views": {
+      "batikcode-remote-explorer": [
+        {
+          "id": "batikcode.remoteExplorer.hosts",
+          "name": "SSH Hosts",
+          "icon": "$(server)"
+        },
+        {
+          "id": "batikcode.remoteExplorer.tools",
+          "name": "Remote Tools",
+          "icon": "$(tools)"
+        },
+        {
+          "id": "batikcode.remoteExplorer.telegram",
+          "name": "Telegram Remote Coding",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "batikcode.remoteExplorer.open",
+        "title": "Open Remote Explorer",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.remoteExplorer.refresh",
+        "title": "Refresh Remote Explorer",
+        "category": "BatikCode",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "batikcode.remoteExplorer.connectTerminal",
+        "title": "Connect in SSH Terminal",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.remoteExplorer.connectWorkspace",
+        "title": "Open Remote Workspace",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.remoteExplorer.openSshConfig",
+        "title": "Open SSH Configuration",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.remoteExplorer.installSshAdapter",
+        "title": "Install SSH Resolver",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.remoteExplorer.findSshAdapter",
+        "title": "Find Open Remote SSH Adapter",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.openMenu",
+        "title": "Telegram Remote Coding",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.configureToken",
+        "title": "Configure BotFather Token",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.start",
+        "title": "Start Telegram Bot",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.stop",
+        "title": "Stop Telegram Bot",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.pair",
+        "title": "Pair Telegram User",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.manageChats",
+        "title": "Manage Allowed Telegram Users",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.enableRemoteCoding",
+        "title": "Enable Telegram Workspace Editing",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.cancelTask",
+        "title": "Cancel Telegram Coding Task",
+        "category": "BatikCode"
+      },
+      {
+        "command": "batikcode.telegram.showLog",
+        "title": "Show Telegram Remote Coding Log",
+        "category": "BatikCode",
+        "description": "Open the BatikCode Telegram Output channel. Bot tokens and user prompts are not written to this log."
+      },
+      {
+        "command": "batikcode.telegram.diagnose",
+        "title": "Test Telegram Connectivity",
+        "category": "BatikCode"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "batikcode.remoteExplorer.refresh",
+          "when": "view == batikcode.remoteExplorer.hosts",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "batikcode.remoteExplorer.connectWorkspace",
+          "when": "view == batikcode.remoteExplorer.hosts && viewItem == sshHost",
+          "group": "inline"
+        },
+        {
+          "command": "batikcode.remoteExplorer.connectTerminal",
+          "when": "view == batikcode.remoteExplorer.hosts && viewItem == sshHost",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "batikcode.telegram.cancelTask",
+          "when": "batikcode.telegram.busy"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "BatikCode Remote Control",
+      "properties": {
+        "batikcode.telegram.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "scope": "application",
+          "description": "Start the Telegram bot automatically when a valid token has been stored. The bot holds an open long-poll connection to Telegram for as long as the window is open; turn this off to keep BatikCode idle until you start the bot by hand."
+        },
+        "batikcode.telegram.codexExecutable": {
+          "type": "string",
+          "default": "codex",
+          "scope": "application",
+          "description": "Use “codex” from PATH or an absolute path whose filename is codex, codex.exe, codex.cmd, or codex.bat."
+        },
+        "batikcode.telegram.taskTimeoutMinutes": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 120,
+          "scope": "application",
+          "description": "Maximum duration of one Telegram coding task."
+        },
+        "batikcode.telegram.preferredModelId": {
+          "type": "string",
+          "default": "",
+          "scope": "application",
+          "description": "Optional Language Model id or display name to prefer for Telegram natural chat. Leave empty to auto-select a BatikCode Provider Hub model."
+        },
+        "batikcode.telegram.preferredModelFamily": {
+          "type": "string",
+          "default": "",
+          "scope": "application",
+          "description": "Optional Language Model family substring to prefer when preferredModelId is empty (for example deepseek-chat or gpt-4o)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "gulp compile-extension:batikcode-remote-control",
+    "test": "node --test out/test/telegramSecurity.test.js"
+  }
+}

@@ -1,0 +1,10 @@
+{
+	"displayName": "BatikCode Cloudflare Dev Tunnel",
+	"description": "Publishes local development ports through public Cloudflare Quick Tunnels.",
+	"category": "BatikCode Dev Tunnel",
+	"command.showLog": "Show Cloudflare Tunnel Log",
+	"command.start": "Start Cloudflare Dev Tunnel",
+	"command.stopAll": "Stop All Cloudflare Dev Tunnels",
+	"command.selectCloudflared": "Select cloudflared Executable",
+	"command.openDownload": "Open cloudflared Download Page"
+}
