@@ -340,7 +340,14 @@ export class OAuthCliBootstrap {
 	 * Chats through Cloud Code with the stored Antigravity token, refreshing it
 	 * first when due and resolving the project the call must be billed to.
 	 */
-	private async runAntigravityChat(model: string, prompt: string, token: vscode.CancellationToken): Promise<string> {
+	public async runAntigravityChat(
+		model: string,
+		contents: readonly CloudCodeTurn[],
+		systemInstruction: string | undefined,
+		tools: readonly CloudCodeTool[] | undefined,
+		toolMode: 'auto' | 'required',
+		token: vscode.CancellationToken
+	): Promise<CloudCodeReply> {
 		const tokens = await this.getValidTokens('antigravity');
 		if (!tokens) {
 			throw new Error('Antigravity is not connected. Sign in from the Account & AI Provider Hub.');
@@ -359,21 +366,24 @@ export class OAuthCliBootstrap {
 		const controller = new AbortController();
 		const cancellation = token.onCancellationRequested(() => controller.abort());
 		try {
-			return await runCloudCodeChat(tokens.accessToken, this.antigravityProject, model, prompt, controller.signal);
+			return await runCloudCodeChat(
+				tokens.accessToken,
+				this.antigravityProject,
+				model,
+				contents,
+				systemInstruction,
+				tools,
+				toolMode,
+				controller.signal
+			);
 		} finally {
 			cancellation.dispose();
 		}
 	}
 
-	public async runChat(id: 'codex-cli' | 'gemini-cli' | 'antigravity', model: string, prompt: string, token: vscode.CancellationToken): Promise<string> {
+	/** Antigravity is deliberately absent: it speaks HTTP, see {@link runAntigravityChat}. */
+	public async runChat(id: 'codex-cli' | 'gemini-cli', model: string, prompt: string, token: vscode.CancellationToken): Promise<string> {
 		const profile = PROFILES[id];
-
-		// Antigravity talks to Cloud Code over HTTP with the stored OAuth token —
-		// it has no CLI, so it must not be gated on one being installed.
-		if (id === 'antigravity') {
-			return this.runAntigravityChat(model, prompt, token);
-		}
-
 		const executable = await findExecutable(profile.executable);
 		if (!executable) {
 			throw new Error(`${profile.displayName} is not installed or is not available on PATH. Run "${profile.executable}" in a terminal to verify.`);
@@ -1104,40 +1114,91 @@ async function loadCloudCodeProject(accessToken: string): Promise<string | undef
 	}
 }
 
+/** A tool the model may call, in the shape Gemini declares them. */
+export interface CloudCodeTool {
+	readonly name: string;
+	readonly description: string;
+	readonly inputSchema: object;
+}
+
+/** One turn of a Cloud Code conversation, already reduced to Gemini's roles. */
+export interface CloudCodeTurn {
+	readonly role: 'user' | 'model';
+	readonly parts: readonly object[];
+}
+
+export interface CloudCodeReply {
+	readonly text: string;
+	readonly toolCalls: readonly { id: string; name: string; arguments: object }[];
+}
+
 /**
- * Sends one prompt through Cloud Code using an Antigravity OAuth token. The
- * request body is the Gemini shape wrapped in Cloud Code's envelope.
+ * Sends a conversation through Cloud Code using an Antigravity OAuth token.
+ *
+ * Unlike the CLI transports, this speaks Gemini's HTTP API directly, so it can
+ * declare tools and return the model's `functionCall` parts — which is what lets
+ * Antigravity models drive agent mode instead of only answering questions.
  */
-async function runCloudCodeChat(accessToken: string, project: string, model: string, prompt: string, signal: AbortSignal): Promise<string> {
+async function runCloudCodeChat(
+	accessToken: string,
+	project: string,
+	model: string,
+	contents: readonly CloudCodeTurn[],
+	systemInstruction: string | undefined,
+	tools: readonly CloudCodeTool[] | undefined,
+	toolMode: 'auto' | 'required',
+	signal: AbortSignal
+): Promise<CloudCodeReply> {
+	const request: Record<string, unknown> = { contents };
+	if (systemInstruction) {
+		request.systemInstruction = { parts: [{ text: systemInstruction }] };
+	}
+	if (tools?.length) {
+		request.tools = [{
+			functionDeclarations: tools.map(tool => ({
+				name: tool.name,
+				description: tool.description,
+				parameters: tool.inputSchema
+			}))
+		}];
+		request.toolConfig = { functionCallingConfig: { mode: toolMode === 'required' ? 'ANY' : 'AUTO' } };
+	}
+
 	const response = await fetch(`${CLOUD_CODE_BASE_URL}:generateContent`, {
 		method: 'POST',
 		headers: cloudCodeHeaders(accessToken),
-		body: JSON.stringify({
-			project,
-			model,
-			request: { contents: [{ role: 'user', parts: [{ text: prompt }] }] }
-		}),
+		body: JSON.stringify({ project, model, request }),
 		signal
 	});
 	if (!response.ok) {
 		const detail = (await response.text().catch(() => '')).slice(0, 300);
 		throw new Error(`Antigravity request failed (HTTP ${response.status}): ${detail}`);
 	}
+
+	type Part = { text?: unknown; functionCall?: { name?: unknown; args?: unknown } };
 	const payload = await response.json() as {
-		response?: { candidates?: readonly { content?: { parts?: readonly { text?: unknown }[] } }[] };
-		candidates?: readonly { content?: { parts?: readonly { text?: unknown }[] } }[];
+		response?: { candidates?: readonly { content?: { parts?: readonly Part[] } }[] };
+		candidates?: readonly { content?: { parts?: readonly Part[] } }[];
 	};
 	// Cloud Code nests the Gemini reply under `response`; accept the bare shape too.
-	const candidates = payload.response?.candidates ?? payload.candidates ?? [];
-	const text = candidates
-		.flatMap(candidate => candidate.content?.parts ?? [])
-		.map(part => (typeof part.text === 'string' ? part.text : ''))
-		.filter(Boolean)
-		.join('');
-	if (!text) {
-		throw new Error('Antigravity returned no text content.');
+	const parts = (payload.response?.candidates ?? payload.candidates ?? [])
+		.flatMap(candidate => candidate.content?.parts ?? []);
+
+	const text = parts.map(part => (typeof part.text === 'string' ? part.text : '')).filter(Boolean).join('');
+	const toolCalls = parts
+		.filter(part => part.functionCall && typeof part.functionCall.name === 'string')
+		.map((part, index) => ({
+			// Gemini does not issue call ids; the workbench needs one to pair the
+			// result back, and name+index is unique within a single reply.
+			id: `${part.functionCall!.name as string}-${index}`,
+			name: part.functionCall!.name as string,
+			arguments: (part.functionCall!.args ?? {}) as object
+		}));
+
+	if (!text && !toolCalls.length) {
+		throw new Error('Antigravity returned neither text nor a tool call.');
 	}
-	return text;
+	return { text, toolCalls };
 }
 
 function safeErrorMessage(error: unknown): string {

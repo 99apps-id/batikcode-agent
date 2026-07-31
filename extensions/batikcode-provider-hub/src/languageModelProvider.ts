@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { OAuthBootstrapId, OAuthCliBootstrap } from './oauthCliBootstrap';
+import { CloudCodeTurn, OAuthBootstrapId, OAuthCliBootstrap } from './oauthCliBootstrap';
 import { ProviderDefinition } from './providerCatalog';
 import { providerIdentity, ProviderTransport } from './providerIdentity';
 import { ProviderModelCatalog } from './providerModelCatalog';
@@ -128,6 +128,27 @@ export class BatikCodeLanguageModelProvider implements vscode.LanguageModelChatP
 			text = response.text;
 			attempts = response.attempts;
 			for (const call of response.toolCalls) {
+				progress.report(new vscode.LanguageModelToolCallPart(call.id, call.name, call.arguments));
+				emittedToolCalls++;
+			}
+		} else if (model.transport === 'antigravity') {
+			// Cloud Code speaks Gemini over HTTP, so unlike the CLI transports it
+			// can declare tools and return functionCall parts — which is what makes
+			// these models usable in agent mode.
+			const reply = await this.oauth.runAntigravityChat(
+				selectedModelId,
+				toCloudCodeContents(normalized),
+				providerIdentity(model.providerName, model.transport, selectedModelId),
+				options.tools?.map(tool => ({
+					name: tool.name,
+					description: tool.description,
+					inputSchema: tool.inputSchema ?? { type: 'object', properties: {} }
+				})),
+				options.toolMode === vscode.LanguageModelChatToolMode.Required ? 'required' : 'auto',
+				token
+			);
+			text = reply.text;
+			for (const call of reply.toolCalls) {
 				progress.report(new vscode.LanguageModelToolCallPart(call.id, call.name, call.arguments));
 				emittedToolCalls++;
 			}
@@ -303,6 +324,11 @@ function modelCapabilities(
 	model: string,
 	transport: BatikCodeModel['transport']
 ): vscode.LanguageModelChatCapabilities {
+	if (transport === 'antigravity') {
+		// Cloud Code is reached over HTTP with Gemini's function-calling API, so
+		// this transport really can drive the agent loop.
+		return { toolCalling: true, imageInput: true };
+	}
 	if (transport !== 'router') {
 		// Agent mode needs the provider to emit LanguageModelToolCallPart so the
 		// workbench can run the tool and feed the result back. The CLI transports
@@ -325,6 +351,57 @@ function modelCapabilities(
 		toolCalling: supportsTools,
 		imageInput: supportsImageInput(provider.id, model)
 	};
+}
+
+/**
+ * Reduces the conversation to Gemini's `contents` shape for Cloud Code.
+ *
+ * Gemini has only `user` and `model` roles: a system prompt travels separately
+ * as `systemInstruction`, and a tool result is a `functionResponse` part on a
+ * user turn. Tool calls must be replayed as `functionCall` parts so the model
+ * can pair each result with the call that produced it.
+ */
+function toCloudCodeContents(messages: readonly NormalizedChatMessage[]): CloudCodeTurn[] {
+	const contents: CloudCodeTurn[] = [];
+	for (const message of messages) {
+		if (message.role === 'system') {
+			continue;
+		}
+		if (message.role === 'tool') {
+			contents.push({
+				role: 'user',
+				parts: [{
+					functionResponse: {
+						name: message.toolCallId ?? 'tool',
+						response: { content: contentAsText(message.content) }
+					}
+				}]
+			});
+			continue;
+		}
+		const parts: object[] = [];
+		const text = contentAsText(message.content);
+		if (text) {
+			parts.push({ text });
+		}
+		for (const call of message.toolCalls ?? []) {
+			parts.push({ functionCall: { name: call.name, args: call.arguments } });
+		}
+		if (parts.length) {
+			contents.push({ role: message.role === 'assistant' ? 'model' : 'user', parts });
+		}
+	}
+	return contents;
+}
+
+function contentAsText(content: NormalizedChatMessage['content']): string {
+	if (typeof content === 'string') {
+		return content;
+	}
+	return content
+		.map(part => part.type === 'text' ? part.text ?? '' : `[${part.mimeType ?? 'attachment'}]`)
+		.filter(Boolean)
+		.join('\n');
 }
 
 function asCliPrompt(messages: readonly NormalizedChatMessage[], tools?: readonly NormalizedTool[]): string {
