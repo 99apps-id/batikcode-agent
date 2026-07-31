@@ -112,6 +112,18 @@ export class TelegramApi {
 		}, signal);
 	}
 
+	/**
+	 * Clears the command menu before rewriting it.
+	 *
+	 * `setMyCommands` only replaces the default scope. A list registered earlier
+	 * under a narrower scope (a specific chat, or a language) keeps winning, so a
+	 * newly added command never shows up for the very user who set the bot up.
+	 * Deleting first collapses those back to one authoritative list.
+	 */
+	public deleteCommands(signal?: AbortSignal): Promise<boolean> {
+		return this.call<boolean>('deleteMyCommands', {}, signal);
+	}
+
 	public setCommands(signal?: AbortSignal): Promise<boolean> {
 		return this.call<boolean>('setMyCommands', {
 			commands: [

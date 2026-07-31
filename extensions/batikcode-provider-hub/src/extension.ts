@@ -86,12 +86,24 @@ export function activate(context: vscode.ExtensionContext): BatikCodeProviderHub
 	// all under a single hub-wide section.
 	const languageModelProviders = MODEL_PROVIDERS.map(provider =>
 		new BatikCodeLanguageModelProvider(provider, providerRouter, oauthBootstrap, providerModelCatalog));
+	const registrationLog = vscode.window.createOutputChannel('BatikCode Models', { log: true });
+	context.subscriptions.push(registrationLog);
 	for (const [index, languageModelProvider] of languageModelProviders.entries()) {
-		context.subscriptions.push(
-			languageModelProvider,
-			vscode.lm.registerLanguageModelChatProvider(providerVendorId(MODEL_PROVIDERS[index].id), languageModelProvider)
-		);
+		const definition = MODEL_PROVIDERS[index];
+		const vendor = providerVendorId(definition.id);
+		context.subscriptions.push(languageModelProvider);
+		try {
+			context.subscriptions.push(vscode.lm.registerLanguageModelChatProvider(vendor, languageModelProvider));
+		} catch (error) {
+			// A vendor the workbench does not know about throws. Letting that
+			// escape aborts activate(), which would take every other provider —
+			// and the chat participant — down with it.
+			registrationLog.appendLine(
+				`[register] ${definition.name} (${vendor}) failed: ${error instanceof Error ? error.message : String(error)}`
+			);
+		}
 	}
+	registrationLog.appendLine(`[register] ${languageModelProviders.length} provider vendors registered.`);
 	context.subscriptions.push(
 		vscode.chat.createChatParticipant('batikcode.chat', handleChatRequest),
 		vscode.commands.registerCommand(HUB_COMMAND, () => openHub(context)),

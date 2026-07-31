@@ -78,7 +78,11 @@ export class CodexTaskRunner {
 
 		// Pick a model — prefer the BatikCode provider hub.
 		const models = await vscode.lm.selectChatModels();
-		const model = models.find(m => m.vendor === 'batikcode') ?? models[0];
+		// The Provider Hub registers one vendor per upstream provider
+		// (`batikcode-openai`, `batikcode-anthropic`, …), so an exact match on
+		// `batikcode` never hits and this silently fell back to models[0] — which
+		// may be a Copilot model that is not signed in.
+		const model = models.find(m => m.vendor.startsWith('batikcode-')) ?? models[0];
 		if (!model) {
 			throw new Error('No AI model available. Add a provider in BatikCode Account & AI Provider Hub.');
 		}
@@ -211,12 +215,20 @@ export class CodexTaskRunner {
 			// Include partial output so the user at least sees what was produced.
 			const partial = output.trim();
 			const partialInfo = partial ? `\n\nPartial output before error:\n${partial.slice(0, 4000)}` : '';
-			const prefix = token.isCancellationRequested
+			const cancelled = token.isCancellationRequested;
+			const timedOut = isTimedOut();
+			const prefix = cancelled
 				? 'Task cancelled'
-				: isTimedOut()
+				: timedOut
 					? `Task timed out after ${Math.ceil(timeoutMs / 60_000)} minutes`
 					: 'Agent task failed';
-			throw new Error(`${prefix}.${partialInfo}`);
+			// Cancellation and timeout are self-explanatory; anything else needs the
+			// underlying reason, which is otherwise lost — the caller relays this
+			// message to Telegram, where there is no log to fall back on.
+			const reason = cancelled || timedOut
+				? ''
+				: `: ${error instanceof Error ? error.message : String(error)}`;
+			throw new Error(`${prefix}${reason}.${partialInfo}`, { cause: error });
 		}
 	}
 

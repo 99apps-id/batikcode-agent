@@ -62,8 +62,12 @@ jobs:
         run: |
           # node_modules plus the build output do not fit alongside the runner's
           # preinstalled toolchains.
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/.ghcup /usr/local/share/boost /usr/share/swift \
+            /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
           df -h /
+          free -h
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -127,7 +131,25 @@ jobs:
         run: |
           set -e
           mkdir -p .build
-          npm run gulp vscode-reh-${{ matrix.platform }}-${{ matrix.arch }}
+          # One phase per process. The all-in-one task holds compile, bundle and
+          # package in a single Node heap, and the mangler alone peaks past 3.4GB
+          # while holding 12k classes at once — the runner kills the job before it
+          # finishes. Mangling only shortens symbol names, so skipping it costs
+          # nothing but output size.
+          GULP="node --experimental-strip-types --max-old-space-size=6144 ./node_modules/gulp/bin/gulp.js"
+          for phase in \
+            compile-build-without-mangling \
+            compile-non-native-extensions-build \
+            compile-copilot-extension-build \
+            compile-extension-media-build \
+            bundle-vscode-reh \
+            vscode-reh-${{ matrix.platform }}-${{ matrix.arch }}-ci
+          do
+            echo "::group::$phase"
+            $GULP "$phase"
+            echo "::endgroup::"
+            df -h / | tail -1
+          done
 
       - name: Package server
         id: package

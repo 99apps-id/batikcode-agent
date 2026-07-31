@@ -715,7 +715,16 @@ export class TelegramBotController implements vscode.Disposable {
 			await sendAccumulated(true);
 
 			const message = safeErrorMessage(error);
+			// Log the stack and the underlying cause: the chat reply is size-capped,
+			// so the Output channel is the only place the full failure survives.
 			this.output.appendLine(`[telegram] agent task failed: ${message.slice(0, 500)}`);
+			if (error instanceof Error && error.stack) {
+				this.output.appendLine(error.stack);
+			}
+			const cause = error instanceof Error ? error.cause : undefined;
+			if (cause) {
+				this.output.appendLine(`[telegram] caused by: ${cause instanceof Error ? cause.stack ?? cause.message : String(cause)}`);
+			}
 			await this.sendChunks(api, chatId, `❌ ${message}`);
 		} finally {
 			clearTimeout(timeoutTimer);

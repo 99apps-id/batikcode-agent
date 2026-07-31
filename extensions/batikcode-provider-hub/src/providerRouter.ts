@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { PROVIDERS, ProviderAuthentication, ProviderDefinition, ProviderProtocol } from './providerCatalog';
 import { ProviderAccountCandidate, ProviderAccountPool } from './providerAccountPool';
 import { ProviderModelCatalog } from './providerModelCatalog';
-import { openAiChatCompletionsUrl } from './providerProtocol';
+import { openAiChatCompletionsUrl, supportsImageInput } from './providerProtocol';
 
 const CONFIGURATION_STATE_KEY = 'batikcode.providerRouter.configurations';
 const AUTHENTICATION_COOLDOWN = 5 * 60_000;
@@ -547,14 +547,12 @@ export class ProviderRouter {
 					}
 				};
 			case 'openai':
-			case 'mcp':
-			case 'provider-baru':
 				return {
 					url: openAiChatCompletionsUrl(provider.id, endpoint, model),
 					headers,
 					body: {
 						model,
-						messages: request.messages.map(toOpenAiMessage),
+						messages: request.messages.map(message => toOpenAiMessage(message, supportsImageInput(provider.id, model))),
 						...(request.maxTokens === undefined ? {} : { max_tokens: request.maxTokens }),
 						...(request.temperature === undefined ? {} : { temperature: request.temperature }),
 						...(request.tools?.length ? {
@@ -706,7 +704,7 @@ function parseRetryAfter(headers: Headers): number | undefined {
 	return undefined;
 }
 
-function toOpenAiMessage(message: NormalizedChatMessage): object {
+function toOpenAiMessage(message: NormalizedChatMessage, supportsImages: boolean): object {
 	if (message.role === 'tool') {
 		return {
 			role: 'tool',
@@ -718,10 +716,16 @@ function toOpenAiMessage(message: NormalizedChatMessage): object {
 		role: message.role,
 		content: Array.isArray(message.content)
 			? message.content.map(part => part.type === 'image'
-				? {
-					type: 'image_url',
-					image_url: { url: `data:${part.mimeType ?? 'application/octet-stream'};base64,${part.data ?? ''}` }
-				}
+				? supportsImages
+					? {
+						type: 'image_url',
+						image_url: { url: `data:${part.mimeType ?? 'application/octet-stream'};base64,${part.data ?? ''}` }
+					}
+					// The target model is not vision-capable. Downgrade the image to a
+					// text placeholder instead of sending an image_url part the API
+					// cannot deserialize (DeepSeek's endpoint rejects it with
+					// "unknown variant `image_url`, expected `text`").
+					: { type: 'text', text: `[Image attached: ${part.mimeType ?? 'image'}, ${part.data?.length ?? 0} base64 bytes]` }
 				: { type: 'text', text: part.text ?? '' })
 			: message.content,
 		...(message.toolCalls?.length ? {

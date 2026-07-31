@@ -6,7 +6,7 @@
 import type { OAuthBootstrapId } from './oauthCliBootstrap';
 
 export type ProviderKind = 'account' | 'subscription' | 'apiKey' | 'local';
-export type ProviderProtocol = 'openai' | 'anthropic' | 'gemini' | 'ollama' | 'mcp' | 'provider-baru';
+export type ProviderProtocol = 'openai' | 'anthropic' | 'gemini' | 'ollama';
 export type ProviderAuthentication = 'bearer' | 'x-api-key' | 'x-goog-api-key' | 'api-key' | 'custom' | 'none';
 
 export interface ProviderRoutingDefinition {

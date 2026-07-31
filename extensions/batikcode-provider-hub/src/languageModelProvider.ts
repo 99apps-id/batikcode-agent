@@ -8,7 +8,7 @@ import { OAuthBootstrapId, OAuthCliBootstrap } from './oauthCliBootstrap';
 import { ProviderDefinition } from './providerCatalog';
 import { providerIdentity, ProviderTransport } from './providerIdentity';
 import { ProviderModelCatalog } from './providerModelCatalog';
-import { isVisionModel } from './providerProtocol';
+import { supportsImageInput } from './providerProtocol';
 import { NormalizedChatMessage, NormalizedContentPart, NormalizedTool, ProviderRouter } from './providerRouter';
 
 interface BatikCodeModel extends vscode.LanguageModelChatInformation {
@@ -318,14 +318,12 @@ function modelCapabilities(
 	}
 	const protocol = provider.routing?.protocol;
 	const supportsTools = protocol === 'openai' || protocol === 'anthropic' || protocol === 'gemini';
-	// DeepSeek API supports image input for all models.
-	// For all other providers, only enable image input for known vision models.
-	const imageInput = provider.id === 'deepseek'
-		? true
-		: isVisionModel(model);
+	// Must be the same rule the router serialises by. Advertising more than the
+	// router will send lets the workbench accept an image the endpoint rejects,
+	// and the image then poisons every later turn because it stays in history.
 	return {
 		toolCalling: supportsTools,
-		imageInput
+		imageInput: supportsImageInput(provider.id, model)
 	};
 }
 

@@ -26,4 +26,12 @@ describe('provider protocol helpers', () => {
 		assert.equal(isVisionModel('qwen/qwen2.5-vl-72b'), true);
 		assert.equal(isVisionModel('nvidia/nemotron-3-ultra-550b-a55b'), false);
 	});
+
+	it('does not treat DeepSeek hosted API models as vision-capable', () => {
+		// DeepSeek's api.deepseek.com only serves text models and its
+		// OpenAI-compatible endpoint rejects image_url parts with HTTP 400.
+		assert.equal(isVisionModel('deepseek-chat'), false);
+		assert.equal(isVisionModel('deepseek-reasoner'), false);
+		assert.equal(isVisionModel('deepseek-v4-flash'), false);
+	});
 });

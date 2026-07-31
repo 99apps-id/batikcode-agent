@@ -21,5 +21,36 @@ export function openAiChatCompletionsUrl(providerId: string, endpoint: string, m
 }
 
 export function isVisionModel(model: string): boolean {
-	return /vision|vlm|(?:^|[-_/])vl(?:[-_/]|$)|llava|pixtral/i.test(model);
+	return /vision|vlm|(?:^|[-_/])vl(?:[-_/]|$)|llava|pixtral|gpt-4o|gpt-4\.1|gpt-5|o3|o4-mini|claude|gemini|grok-[2-9]|qwen.*omni|internvl|minicpm-v/i.test(model);
+}
+
+/**
+ * Whether images may be sent to this provider/model as OpenAI `image_url` parts.
+ *
+ * The single source of truth for two decisions that must agree: what the model
+ * advertises to the workbench (which gates the attach button) and what the
+ * router actually serialises. When they disagree, the workbench accepts an image
+ * the endpoint then rejects — and because the image stays in history, every
+ * later turn fails too:
+ *
+ *   HTTP 400: unknown variant `image_url`, expected `text`
+ *
+ * Providers whose chat API only accepts text parts are excluded outright, no
+ * matter what the model is called.
+ */
+const TEXT_ONLY_CONTENT_PROVIDERS: ReadonlySet<string> = new Set([
+	// Rejects image_url with "unknown variant `image_url`, expected `text`".
+	'deepseek',
+	// OpenAI-compatible search API; content parts are text only.
+	'perplexity',
+	// Serves open text models; image parts are not part of its schema.
+	'cerebras',
+	'groq'
+]);
+
+export function supportsImageInput(providerId: string, model: string): boolean {
+	if (TEXT_ONLY_CONTENT_PROVIDERS.has(providerId)) {
+		return false;
+	}
+	return isVisionModel(model);
 }
