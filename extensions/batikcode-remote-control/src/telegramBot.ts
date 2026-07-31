@@ -147,7 +147,15 @@ export class TelegramBotController implements vscode.Disposable {
 				this.output.appendLine(`[telegram] clearing leftover webhook: ${webhook.url} (pending=${webhook.pending_update_count ?? 0})`);
 			}
 			await api.deleteWebhook(false, controller.signal);
-			await api.setCommands(controller.signal);
+			try {
+				await api.deleteCommands(controller.signal);
+				const applied = await api.setCommands(controller.signal);
+				this.output.appendLine(`[telegram] command menu refreshed: ${applied ? 'ok' : 'Telegram returned false'}`);
+			} catch (commandError) {
+				// The menu is cosmetic — every command still works when typed, so a
+				// failure here must not stop the bot from coming online.
+				this.output.appendLine(`[telegram] could not refresh the command menu: ${safeErrorMessage(commandError)}`);
+			}
 			const offset = Math.max(0, this.context.globalState.get<number>(UPDATE_OFFSET_STATE_KEY, 0));
 			const botHandle = this.botUser.username ? `@${this.botUser.username}` : this.botUser.first_name;
 			this.updateState('online', `Online ${botHandle}`, 'Long polling is active.');
