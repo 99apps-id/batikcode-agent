@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace } from 'vscode';
+import { resolveGitHubClientId } from './githubOAuthConfig';
 
 export interface IConfig {
 	// The client ID of the GitHub OAuth app
@@ -14,22 +15,18 @@ export interface IConfig {
 let clientIdOverride: string | undefined;
 let clientSecretOverride: string | undefined;
 
-// Temporary development fallback copied from the upstream Code - OSS GitHub
-// authentication extension. Replace it with a BatikCode-owned OAuth client
-// before distributing BatikCode outside the current private test group.
-const microsoftVsCodeGitHubClientId = '01ab8ac9400c4e429b23';
-
 function configuredClientId(): string {
-	const environmentValue = typeof process !== 'undefined' ? process.env.BATIKCODE_GITHUB_CLIENT_ID?.trim() : undefined;
-	return environmentValue
-		|| workspace.getConfiguration('batikcode.githubOAuth').get<string>('clientId', '').trim()
-		|| microsoftVsCodeGitHubClientId;
+	return resolveGitHubClientId(
+		typeof process !== 'undefined' ? process.env.BATIKCODE_GITHUB_CLIENT_ID : undefined,
+		workspace.getConfiguration('batikcode.githubOAuth').get<string>('clientId', '')
+	);
 }
 
 /**
  * Desktop authentication defaults to GitHub's device flow, so a client secret
- * is not shipped in the application. Environment and user configuration
- * override the temporary upstream development fallback.
+ * is not shipped in the application. Sign-in uses the BatikCode-owned OAuth
+ * App by default; environment and user configuration override it for forks and
+ * private builds.
  */
 export const Config: IConfig = {
 	get gitHubClientId(): string {

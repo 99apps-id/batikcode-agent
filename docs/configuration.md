@@ -29,7 +29,11 @@ Client selection priority:
 
 1. `BATIKCODE_GITHUB_CLIENT_ID`;
 2. `batikcode.githubOAuth.clientId`;
-3. temporary upstream public client in private-development builds.
+3. the BatikCode-owned OAuth App, which is the built-in default.
+
+Sign-in works with no configuration. The first two exist so a fork or a private
+build can point at its own OAuth App without patching the source; that app must
+have Device Flow enabled, since desktop sign-in ships no client secret.
 
 Example for a single development shell:
 

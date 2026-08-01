@@ -34,20 +34,21 @@ review or endorsement.
 Marketplace-only packages must not be copied into a BatikCode distribution
 without explicit permission and license review.
 
-## GitHub OAuth temporary exception
+## GitHub OAuth
 
-Private-development builds temporarily use the public client ID from the
-upstream Code - OSS GitHub authentication extension when no BatikCode client is
-configured. This is a testing bridge, not a release identity. Before broader
-distribution:
+BatikCode signs in through its own GitHub OAuth App, so the consent screen a
+user sees names BatikCode rather than another product. The client ID ships in
+the source: it travels to GitHub from every user's machine, so it is public by
+design.
 
-- register a BatikCode-owned GitHub OAuth App;
-- enable Device Flow;
-- document callback, revoke, and incident procedures;
-- remove the upstream fallback;
-- validate the provider terms.
+No client secret is packaged. Desktop sign-in uses GitHub's device flow, which
+does not take one, and a secret shipped to a user's machine would not stay
+secret. The OAuth App therefore has Device Flow enabled and no live secret; if
+a secret is ever generated on it, delete it rather than leave it unused.
 
-Never package a confidential client secret into a desktop application.
+Should the client ID need to be rotated — a new app, a transfer to an
+organization — the environment variable and the user setting both override the
+built-in default, so a build can move before the source does.
 
 ## API providers
 

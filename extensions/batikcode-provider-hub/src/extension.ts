@@ -56,7 +56,6 @@ interface HubState {
 	readonly providers: readonly ProviderStatus[];
 	readonly connectedCount: number;
 	readonly githubAccount?: string;
-	readonly githubOAuthConfigured: boolean;
 	readonly copilotInstalled: boolean;
 }
 
@@ -364,12 +363,6 @@ async function handleMessage(message: { type?: string; provider?: string }): Pro
 }
 
 async function connectGitHub(interactive: boolean): Promise<vscode.AuthenticationSession | undefined> {
-	if (!isGitHubOAuthConfigured()) {
-		if (interactive) {
-			await oauthBootstrap.manage('github-cli');
-		}
-		return undefined;
-	}
 	try {
 		return await vscode.authentication.getSession(
 			'github',
@@ -537,10 +530,9 @@ async function testProviderRouting(): Promise<void> {
 async function getHubState(): Promise<HubState> {
 	const githubSession = await connectGitHub(false);
 	const copilotExtension = getCopilotExtension();
-	const githubOAuthConfigured = isGitHubOAuthConfigured();
 	const statuses = await Promise.all(PROVIDERS.map(async provider => {
 		try {
-			return await getProviderStatus(provider, githubSession, githubOAuthConfigured, Boolean(copilotExtension));
+			return await getProviderStatus(provider, githubSession, Boolean(copilotExtension));
 		} catch (error) {
 			return {
 				id: provider.id,
@@ -554,7 +546,6 @@ async function getHubState(): Promise<HubState> {
 		providers: statuses,
 		connectedCount: statuses.filter(status => status.state === 'connected').length,
 		githubAccount: githubSession?.account.label,
-		githubOAuthConfigured,
 		copilotInstalled: Boolean(copilotExtension)
 	};
 }
@@ -562,19 +553,9 @@ async function getHubState(): Promise<HubState> {
 async function getProviderStatus(
 	provider: ProviderDefinition,
 	githubSession: vscode.AuthenticationSession | undefined,
-	githubOAuthConfigured: boolean,
 	copilotInstalled: boolean
 ): Promise<ProviderStatus> {
 	if (provider.action === 'github') {
-		if (!githubOAuthConfigured) {
-			const status = await oauthBootstrap.getStatus('github-cli');
-			return {
-				id: provider.id,
-				state: status.connected ? 'connected' : status.available ? 'available' : 'unavailable',
-				label: status.label,
-				detail: status.detail
-			};
-		}
 		return githubSession
 			? { id: provider.id, state: 'connected', label: 'Connected', detail: githubSession.account.label }
 			: { id: provider.id, state: 'available', label: 'Ready to connect', detail: 'BatikCode OAuth App configured; device-flow sign-in is ready.' };
@@ -681,10 +662,6 @@ async function refreshPanel(): Promise<void> {
 
 function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
-}
-
-function isGitHubOAuthConfigured(): boolean {
-	return Boolean(vscode.workspace.getConfiguration('batikcode.githubOAuth').get<string>('clientId', '').trim());
 }
 
 function nonce(): string {

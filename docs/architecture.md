@@ -84,10 +84,9 @@ OAuth bootstrap starts installed official clients such as GitHub CLI, Codex
 CLI, Gemini CLI, and Kiro. BatikCode reads only reliable non-secret status and
 does not copy tokens or credential caches owned by those applications.
 
-GitHub currently has a private-development exception: it can fall back to the
-public client ID used by the upstream Code - OSS authentication extension.
-BatikCode environment and setting overrides take priority. This exception is a
-release blocker before broad distribution.
+GitHub sign-in uses the BatikCode-owned OAuth App through GitHub's device flow,
+so no client secret is packaged. The environment variable and the user setting
+override the built-in client ID for forks and private builds.
 
 ### Browser Preview and Dev Tunnel
 
@@ -121,7 +120,9 @@ use the Visual Studio Marketplace API or assume redistribution rights for
 Marketplace-only extensions.
 
 The long-term target is a BatikCode-owned Open VSX deployment with explicit
-publishing, moderation, mirroring, backup, and availability policies.
+publishing, moderation, mirroring, backup, and availability policies. A
+reference self-hosted deployment (Docker Compose) and switch instructions are
+in `deploy/open-vsx/`.
 
 ## State and secret ownership
 
