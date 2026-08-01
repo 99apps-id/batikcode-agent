@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { onUnexpectedError } from '../../../../base/common/errors.js';
 import { Disposable } from '../../../../base/common/lifecycle.js';
 import { Schemas } from '../../../../base/common/network.js';
 import { ILabelService } from '../../../../platform/label/common/label.js';
@@ -14,6 +15,7 @@ import { terminalStrings } from '../common/terminalStrings.js';
 import { IEditorResolverService, RegisteredEditorPriority } from '../../../services/editor/common/editorResolverService.js';
 import { IWorkbenchEnvironmentService } from '../../../services/environment/common/environmentService.js';
 import { ILifecycleService, LifecyclePhase } from '../../../services/lifecycle/common/lifecycle.js';
+import { IWorkbenchLayoutService, Parts } from '../../../services/layout/browser/layoutService.js';
 import { IEmbedderTerminalService } from '../../../services/terminal/common/embedderTerminalService.js';
 
 /**
@@ -30,6 +32,7 @@ export class TerminalMainContribution extends Disposable implements IWorkbenchCo
 		@IWorkbenchEnvironmentService workbenchEnvironmentService: IWorkbenchEnvironmentService,
 		@ILabelService labelService: ILabelService,
 		@ILifecycleService lifecycleService: ILifecycleService,
+		@IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
 		@ITerminalService terminalService: ITerminalService,
 		@ITerminalEditorService terminalEditorService: ITerminalEditorService,
 		@ITerminalGroupService terminalGroupService: ITerminalGroupService,
@@ -43,6 +46,7 @@ export class TerminalMainContribution extends Disposable implements IWorkbenchCo
 			workbenchEnvironmentService,
 			labelService,
 			lifecycleService,
+			layoutService,
 			terminalService,
 			terminalEditorService,
 			terminalGroupService,
@@ -56,6 +60,7 @@ export class TerminalMainContribution extends Disposable implements IWorkbenchCo
 		workbenchEnvironmentService: IWorkbenchEnvironmentService,
 		labelService: ILabelService,
 		lifecycleService: ILifecycleService,
+		layoutService: IWorkbenchLayoutService,
 		terminalService: ITerminalService,
 		terminalEditorService: ITerminalEditorService,
 		terminalGroupService: ITerminalGroupService,
@@ -71,6 +76,12 @@ export class TerminalMainContribution extends Disposable implements IWorkbenchCo
 			});
 			terminalService.setActiveInstance(terminal);
 			await terminalService.revealActiveTerminal();
+		}));
+
+		this._register(layoutService.onDidChangePartVisibility(e => {
+			if (e.partId === Parts.PANEL_PART && e.visible) {
+				terminalGroupService.showPanel(false).catch(onUnexpectedError);
+			}
 		}));
 
 		await lifecycleService.when(LifecyclePhase.Restored);
@@ -134,5 +145,27 @@ export class TerminalMainContribution extends Disposable implements IWorkbenchCo
 				separator: ''
 			}
 		}));
+
+		// Have a live shell waiting the first time the panel is opened, instead of
+		// paying for pty host startup at that moment.
+		//
+		// Keyed to Eventually, and deliberately not awaited. A contribution that
+		// blocks inside a phase holds that phase open, and the pty host does not
+		// launch until the Restored phase has finished — so awaiting a terminal
+		// from inside Restored leaves both sides waiting and no terminal ever
+		// appears, which is exactly the hang this replaces.
+		lifecycleService.when(LifecyclePhase.Eventually).then(async () => {
+			try {
+				const terminal = terminalService.activeInstance
+					?? terminalService.instances[0]
+					?? await terminalService.createTerminal({ location: TerminalLocation.Panel });
+				terminalService.setActiveInstance(terminal);
+				await terminalGroupService.showPanel(false);
+			} catch (error) {
+				// A shell that cannot start is worth reporting, but it must not take
+				// the rest of the workbench down with it.
+				onUnexpectedError(error);
+			}
+		});
 	}
 }
