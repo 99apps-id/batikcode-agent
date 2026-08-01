@@ -54,6 +54,13 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y libxkbfile-dev pkg-config libkrb5-dev libxss1
+
+      - name: Rewrite GitHub SSH URLs to HTTPS
+        if: ${{ steps.cacheNodeModules.outputs.cache-hit != 'true' }}
+        run: |
+          git config --global url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global url.https://github.com/.insteadOf git@github.com:
+
       - name: Execute npm
         if: ${{ steps.cacheNodeModules.outputs.cache-hit != 'true' }}
         env:

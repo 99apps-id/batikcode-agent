@@ -31,6 +31,12 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: sudo apt update -y && sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
 
+      - name: Rewrite GitHub SSH URLs to HTTPS
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          git config --global url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global url.https://github.com/.insteadOf git@github.com:
+
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
@@ -105,6 +111,12 @@ jobs:
           # Without these -dev packages root npm ci fails on Linux.
           sudo apt update -y
           sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
+
+      - name: Rewrite GitHub SSH URLs to HTTPS
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          git config --global url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global url.https://github.com/.insteadOf git@github.com:
 
       - name: Install build dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
