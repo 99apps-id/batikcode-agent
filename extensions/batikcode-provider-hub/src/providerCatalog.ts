@@ -284,13 +284,32 @@ export const PROVIDERS: readonly ProviderDefinition[] = [
 		id: 'qwen',
 		name: 'Alibaba DashScope (Qwen)',
 		shortName: 'QW',
-		description: 'Connect Qwen models through the international OpenAI-compatible endpoint.',
+		description: 'Pay-as-you-go Qwen models through the international DashScope endpoint.',
 		kind: 'apiKey',
 		action: 'configure',
 		accent: '#6d8cff',
 		routing: {
 			protocol: 'openai',
 			defaultEndpoint: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
+			defaultModel: 'qwen-plus',
+			authentication: 'bearer',
+			requiresKey: true
+		}
+	},
+	{
+		// Separate from the pay-as-you-go entry rather than a swapped endpoint:
+		// the two plans are billed differently and issue their own keys, so a
+		// single card would force one to be reconfigured to reach the other.
+		id: 'qwen-subscription',
+		name: 'Alibaba Qwen (Subscription)',
+		shortName: 'QWS',
+		description: 'Qwen models on a prepaid token plan, billed against the subscription rather than per request.',
+		kind: 'apiKey',
+		action: 'configure',
+		accent: '#6d8cff',
+		routing: {
+			protocol: 'openai',
+			defaultEndpoint: 'https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1',
 			defaultModel: 'qwen-plus',
 			authentication: 'bearer',
 			requiresKey: true

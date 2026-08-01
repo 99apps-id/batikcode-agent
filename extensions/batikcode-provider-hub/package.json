@@ -95,6 +95,10 @@
         "displayName": "Alibaba DashScope (Qwen)"
       },
       {
+        "vendor": "batikcode-qwen-subscription",
+        "displayName": "Alibaba Qwen (Subscription)"
+      },
+      {
         "vendor": "batikcode-fireworks",
         "displayName": "Fireworks AI"
       },
