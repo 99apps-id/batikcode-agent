@@ -277,6 +277,9 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 				<g clip-path="url(#silhouette)" opacity="0.5">
 					<rect width="100" height="100" fill="url(#motif)"/>
 				</g>
+				<!-- Markings last, over the batik: an eye or a stripe buried under the
+				     pattern stops reading as a marking and becomes more texture. -->
+				<g fill="${species.accent}" color="${species.accent}">${species.features}</g>
 			</svg>
 		</div>
 	</div>
