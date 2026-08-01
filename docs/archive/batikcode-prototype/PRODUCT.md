@@ -10,7 +10,7 @@ Beginner, student, professional developer, enterprise developer, and open-source
 
 ## Product Purpose
 
-DeskCode is a fast, modular, extensible, offline-first desktop IDE. Its intended interaction model and visual fidelity are explicitly aligned with Visual Studio Code, while its differentiators are a stable plugin platform, integrated AI, secure process isolation, and a maintainable modular architecture. Success means the core development loop is real rather than simulated, startup remains below three seconds, normal workflows do not crash, and every shipped feature is connected through IPC and tested.
+BatikCode is a fast, modular, extensible, offline-first desktop IDE. Its intended interaction model and visual fidelity are explicitly aligned with Visual Studio Code, while its differentiators are a stable plugin platform, integrated AI, secure process isolation, and a maintainable modular architecture. Success means the core development loop is real rather than simulated, startup remains below three seconds, normal workflows do not crash, and every shipped feature is connected through IPC and tested.
 
 ## Brand Personality
 

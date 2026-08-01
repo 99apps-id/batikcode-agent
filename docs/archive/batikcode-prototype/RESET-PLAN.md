@@ -1,4 +1,4 @@
-# DeskCode Product Reset Plan
+# BatikCode Product Reset Plan
 
 ## Chosen foundation
 
@@ -24,7 +24,7 @@ E:\Project\
 
 - No new features are added to the legacy prototype.
 - No legacy module is copied into Code - OSS without a deletion test and a clear reason.
-- DeskCode changes must prefer product configuration or a built-in extension.
+- BatikCode changes must prefer product configuration or a built-in extension.
 - Upstream patches are reviewed as maintenance liabilities.
 - Unsupported capabilities are disabled visibly; mock success is forbidden.
 
@@ -41,20 +41,20 @@ E:\Project\
 
 ### S1 — Legal-safe product identity
 
-- [ ] Create original DeskCode icons and product artwork.
+- [ ] Create original BatikCode icons and product artwork.
 - [x] Configure application name, data folder, protocol, and executable names.
 - [x] Remove Microsoft product names and default proprietary service endpoints from product configuration.
 - [x] Make core startup safe without a default Copilot agent.
 - [ ] Remove Copilot from dependency install and distribution packaging.
-- [ ] Add DeskCode About and license attribution.
+- [ ] Add BatikCode About and license attribution.
 
 ### S2 — Service adapters
 
 - [ ] Select extension registry strategy.
 - [ ] Configure telemetry as off by default.
-- [ ] Configure DeskCode update feed and signature verification.
+- [ ] Configure BatikCode update feed and signature verification.
 - [ ] Define authentication and OS secret-storage policy.
-- [ ] Implement DeskCode AI as a built-in extension before considering core patches.
+- [ ] Implement BatikCode AI as a built-in extension before considering core patches.
 
 ### S3 — Parity smoke suite
 

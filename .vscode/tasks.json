@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"label": "Install & Watch (Client)",
-			"detail": "Install dependencies, compile and watch VS Code core for fixing a bug or implementing a feature.",
+			"detail": "Install dependencies, compile and watch BatikCode IDE core for fixing a bug or implementing a feature.",
 			"dependsOn": [
 				"Install Dependencies",
 				"Compile",
@@ -14,8 +14,8 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "Run VS Code",
-			"detail": "Run VS Code with a user data directory inside the worktree.",
+			"label": "Run BatikCode IDE",
+			"detail": "Run BatikCode IDE with a user data directory inside the worktree.",
 			"type": "shell",
 			"command": "./scripts/code.sh",
 			"windows": {
@@ -30,7 +30,7 @@
 		},
 		{
 			"label": "Install & Watch (All)",
-			"detail": "Install dependencies and watch all of VS Code (core, extensions and copilot).",
+			"detail": "Install dependencies and watch all of BatikCode IDE (core, extensions and copilot).",
 			"dependsOn": [
 				"Install Dependencies",
 				"Watch"
@@ -230,7 +230,7 @@
 			]
 		},
 		{
-			"label": "VS Code - Build",
+			"label": "BatikCode IDE - Build",
 			"dependsOn": [
 				"Core - Transpile",
 				"Core - Typecheck",
@@ -292,7 +292,7 @@
 			"problemMatcher": "$esbuild"
 		},
 		{
-			"label": "Kill VS Code - Build",
+			"label": "Kill BatikCode IDE - Build",
 			"dependsOn": [
 				"Kill Core - Transpile",
 				"Kill Core - Typecheck",
@@ -303,21 +303,21 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "Restart VS Code - Build",
+			"label": "Restart BatikCode IDE - Build",
 			"dependsOn": [
-				"Kill VS Code - Build",
-				"VS Code - Build"
+				"Kill BatikCode IDE - Build",
+				"BatikCode IDE - Build"
 			],
 			"group": "build",
 			"dependsOrder": "sequence",
 			"problemMatcher": []
 		},
 		{
-			"label": "Kill VS Code - Build, Npm, VS Code - Build",
+			"label": "Kill BatikCode IDE - Build, Npm, BatikCode IDE - Build",
 			"dependsOn": [
-				"Kill VS Code - Build",
+				"Kill BatikCode IDE - Build",
 				"npm: install",
-				"VS Code - Build"
+				"BatikCode IDE - Build"
 			],
 			"group": "build",
 			"dependsOrder": "sequence",
@@ -394,7 +394,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "Run and Compile Agents - OSS",
+			"label": "Run and Compile Agents - BatikCode IDE",
 			"dependsOn": [
 				"Transpile Client",
 				"Run Dev Agents"
@@ -403,7 +403,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "Run and Compile Code - OSS",
+			"label": "Run and Compile BatikCode IDE",
 			"dependsOn": [
 				"Transpile Client",
 				"Run Dev"
@@ -477,7 +477,7 @@
 			}
 		},
 		{
-			"label": "Run VS Code (Web)",
+			"label": "Run BatikCode IDE (Web)",
 			"detail": "Run the Agents window as a web client.",
 			"type": "shell",
 			"command": "./scripts/code-server.sh",

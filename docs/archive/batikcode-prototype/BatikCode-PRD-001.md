@@ -1,11 +1,11 @@
 # PRD-001 – Vision, Strategy & Product Definition
 
-**Produk:** DeskCode IDE  
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Executive Summary
 
-DeskCode adalah Integrated Development Environment (IDE) lintas platform yang dirancang untuk menyediakan pengalaman pengembangan modern dengan arsitektur modular, performa tinggi, keamanan yang baik, serta dukungan AI dan sistem ekstensi.
+BatikCode adalah Integrated Development Environment (IDE) lintas platform yang dirancang untuk menyediakan pengalaman pengembangan modern dengan arsitektur modular, performa tinggi, keamanan yang baik, serta dukungan AI dan sistem ekstensi.
 
 ## 2. Product Vision
 

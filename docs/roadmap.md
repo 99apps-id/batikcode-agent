@@ -7,7 +7,7 @@ until build and release ownership are established.
 ## Phase 0 — Private technical preview
 
 - keep the Code - OSS core development loop stable;
-- complete BatikCode branding and remove stale DeskCode/VS Code product-facing
+- complete BatikCode branding and remove stale VS Code product-facing
   artwork;
 - keep Primary Side Bar and settings behavior consistent;
 - validate Windows terminal, Open VSX, Browser Preview, Provider Hub, Remote

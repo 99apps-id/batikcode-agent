@@ -1,7 +1,7 @@
-# DeskCode prototype archive
+# BatikCode prototype archive
 
 This directory preserves product requirements, audit notes, reset decisions,
-and agent memory from the retired custom DeskCode prototype.
+and agent memory from the retired custom BatikCode prototype.
 
 The files are historical references, not the current product specification.
 Current BatikCode behavior and decisions live in the repository root product

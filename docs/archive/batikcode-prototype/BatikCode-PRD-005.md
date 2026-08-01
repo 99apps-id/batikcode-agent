@@ -1,11 +1,11 @@
 # PRD-005 -- UI/UX Specification
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan standar antarmuka dan pengalaman pengguna DeskCode agar
+Mendefinisikan standar antarmuka dan pengalaman pengguna BatikCode agar
 konsisten, efisien, dan mudah dikembangkan.
 
 ## 2. Prinsip Desain

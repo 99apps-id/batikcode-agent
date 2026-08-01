@@ -1,11 +1,11 @@
 # PRD-007 -- AI Platform
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan platform AI DeskCode sebagai fondasi fitur berbasis
+Mendefinisikan platform AI BatikCode sebagai fondasi fitur berbasis
 kecerdasan buatan yang aman, modular, dan dapat diperluas.
 
 ## 2. Sasaran

@@ -1,11 +1,11 @@
 # PRD-014 -- Extension API Reference
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Menyediakan referensi resmi Extension API DeskCode agar pengembang dapat
+Menyediakan referensi resmi Extension API BatikCode agar pengembang dapat
 membangun ekstensi secara konsisten, aman, dan kompatibel.
 
 ## 2. Prinsip API
@@ -21,7 +21,7 @@ membangun ekstensi secara konsisten, aman, dan kompatibel.
 API utama tersedia melalui namespace:
 
 ``` ts
-import * as deskcode from "deskcode";
+import * as batikcode from "batikcode";
 ```
 
 ## 4. Workspace API
@@ -32,7 +32,7 @@ perubahan workspace - Membaca konfigurasi workspace
 Contoh:
 
 ``` ts
-const folders = deskcode.workspace.getFolders();
+const folders = batikcode.workspace.getFolders();
 ```
 
 ## 5. Editor API
@@ -52,7 +52,7 @@ Fitur: - Register Command - Execute Command - Dispose Command
 Contoh:
 
 ``` ts
-deskcode.commands.registerCommand(
+batikcode.commands.registerCommand(
   "hello.world",
   () => {}
 );

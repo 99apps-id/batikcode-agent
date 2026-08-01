@@ -1,11 +1,11 @@
 # PRD-004 -- Technical Architecture
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Dokumen ini mendefinisikan arsitektur teknis DeskCode sebagai acuan
+Dokumen ini mendefinisikan arsitektur teknis BatikCode sebagai acuan
 implementasi seluruh modul aplikasi.
 
 ## 2. Prinsip Arsitektur

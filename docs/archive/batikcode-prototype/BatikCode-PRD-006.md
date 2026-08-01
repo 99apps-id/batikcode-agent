@@ -1,11 +1,11 @@
 # PRD-006 -- Plugin SDK & Marketplace
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan arsitektur Plugin SDK dan Marketplace DeskCode agar
+Mendefinisikan arsitektur Plugin SDK dan Marketplace BatikCode agar
 pengembang pihak ketiga dapat membuat, mendistribusikan, dan memelihara
 ekstensi secara aman dan konsisten.
 
@@ -19,7 +19,7 @@ ekstensi secara aman dan konsisten.
 ## 3. Arsitektur
 
 ``` text
-DeskCode
+BatikCode
  ├─ Core
  ├─ Extension Host
  ├─ Plugin API
@@ -99,7 +99,7 @@ Fitur:
 ## 10. Versioning
 
 -   Semantic Versioning
--   Minimum DeskCode Version
+-   Minimum BatikCode Version
 -   Maximum Supported Version
 -   Dependency Resolution
 

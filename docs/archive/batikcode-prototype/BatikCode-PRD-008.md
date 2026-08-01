@@ -1,11 +1,11 @@
 # PRD-008 -- Security & Privacy
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan persyaratan keamanan dan privasi DeskCode untuk
+Mendefinisikan persyaratan keamanan dan privasi BatikCode untuk
 melindungi pengguna, proyek, dan ekosistem plugin.
 
 ## 2. Prinsip

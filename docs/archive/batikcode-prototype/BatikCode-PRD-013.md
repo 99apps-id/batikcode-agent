@@ -1,11 +1,11 @@
 # PRD-013 -- Developer SDK
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan Software Development Kit (SDK) DeskCode agar pengembang
+Mendefinisikan Software Development Kit (SDK) BatikCode agar pengembang
 dapat membangun, menguji, mendebug, dan mendistribusikan plugin serta
 modul secara konsisten.
 

@@ -1,11 +1,11 @@
 # PRD-003 -- Functional Requirements
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Dokumen ini mendefinisikan kebutuhan fungsional DeskCode sebagai acuan
+Dokumen ini mendefinisikan kebutuhan fungsional BatikCode sebagai acuan
 implementasi.
 
 ## 2. Ruang Lingkup

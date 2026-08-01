@@ -43,6 +43,6 @@ use the following order of authority:
 
 ## Historical documents
 
-`archive/batikcode-prototype/` contains DeskCode PRDs and notes from before the
+`archive/batikcode-prototype/` contains BatikCode PRDs and notes from before the
 product was reset onto Code - OSS and renamed BatikCode. These documents retain
 useful context, but must not be used to claim that a feature is implemented.

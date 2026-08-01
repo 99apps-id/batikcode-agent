@@ -149,7 +149,7 @@ Workspace skills available for E2E:
 4. Re-open the same session via the sessions sidebar.
 5. Confirm the full turn (user message + assistant text + tool call card) renders identically. Screenshot for comparison.
 6. Use `code-oss-logs` to read `agenthost.log` for the run; grep for `[Claude]` warnings during `getSessionMessages` — none expected on the happy path.
-7. Quit and relaunch the agent host (`Run and Compile Agents - OSS`). Re-open the same session. Confirm restoration still works (no in-memory `_sessions` entry).
+7. Quit and relaunch the agent host (`Run and Compile Agents - BatikCode IDE`). Re-open the same session. Confirm restoration still works (no in-memory `_sessions` entry).
 8. Append a new turn to the restored session and confirm it lands cleanly (validates that a restored session can still take new messages).
 
 **Not used:** `chat-perf` — Phase 13 adds no rendering-hot paths or response-streaming changes; chat-perf belongs to Phase 14 hardening.

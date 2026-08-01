@@ -1,4 +1,4 @@
-# DeskCode Code - OSS Bootstrap Status
+# BatikCode Code - OSS Bootstrap Status
 
 Updated: 2026-07-29
 
@@ -9,7 +9,7 @@ Updated: 2026-07-29
 - Branch: `batikcode/main`
 - Upstream tag: `1.130.0`
 - Upstream commit: `1b6a188127eeaf9194f945eb6eb89a657e93c54c`
-- DeskCode baseline commit: `0353141c`
+- BatikCode baseline commit: `0353141c`
 - Remote: `https://github.com/microsoft/vscode.git`
 
 ## Toolchain
@@ -25,7 +25,7 @@ Updated: 2026-07-29
 
 ## Product configuration completed
 
-- Renamed product and storage identities to DeskCode.
+- Renamed product and storage identities to BatikCode.
 - Assigned independent Windows application IDs.
 - Assigned independent macOS bundle/profile IDs.
 - Changed executable, protocol, server, tunnel, and Linux icon names.
@@ -33,7 +33,7 @@ Updated: 2026-07-29
 - Removed default Copilot product configuration and trusted auth access.
 - Removed Copilot automatic update enablement.
 - Removed Microsoft voice service, agent telemetry name, and webview CDN endpoint.
-- Added a DeskCode development launcher that excludes the upstream Copilot extension.
+- Added a BatikCode development launcher that excludes the upstream Copilot extension.
 - Made onboarding, default-account, chat status, and agent authentication safe when no default chat agent is configured.
 - Preserved open-source debugging built-ins pending license inventory.
 
@@ -48,7 +48,7 @@ Updated: 2026-07-29
 - built-in extension compile: passed
 - extension media and codicons build: passed
 - desktop smoke launch: passed
-- Copilot load scan through `scripts\deskcode.bat`: no matches
+- Copilot load scan through `scripts\batikcode.bat`: no matches
 
 The combined `build-fast` task had one transient `tsgo` failure while three heavy jobs ran concurrently. Each constituent build passed when run in isolation.
 
@@ -58,14 +58,14 @@ The final development smoke retained one nonfatal warning: the local extension h
 
 ```powershell
 $env:PATH='C:\Tools\node-v24.18.0-win-x64;' + $env:PATH
-scripts\deskcode.bat
+scripts\batikcode.bat
 ```
 
 The launcher excludes `GitHub.copilot-chat` from the development built-ins while retaining the generic chat and agent framework.
 
 ## Remaining gates
 
-1. Add original DeskCode icons and artwork.
+1. Add original BatikCode icons and artwork.
 2. Remove Copilot from install/build/package scripts, not only the dev launcher.
 3. Select an extension registry and update service.
 4. Run the full IDE parity smoke suite.

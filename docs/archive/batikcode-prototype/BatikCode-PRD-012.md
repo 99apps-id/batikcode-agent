@@ -1,11 +1,11 @@
 # PRD-012 -- Database & Storage Design
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Mendefinisikan arsitektur penyimpanan data DeskCode agar konfigurasi,
+Mendefinisikan arsitektur penyimpanan data BatikCode agar konfigurasi,
 metadata, cache, dan data aplikasi dikelola secara konsisten, aman, dan
 mudah dimigrasikan.
 
@@ -73,7 +73,7 @@ JSON (konfigurasi) - File system lokal (workspace & cache)
 ## 6. Struktur Direktori
 
 ``` text
-DeskCode/
+BatikCode/
  ├─ config/
  ├─ storage/
  ├─ cache/

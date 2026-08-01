@@ -1,11 +1,11 @@
 # PRD-011 -- API Specification
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
-Dokumen ini mendefinisikan spesifikasi API internal dan publik DeskCode
+Dokumen ini mendefinisikan spesifikasi API internal dan publik BatikCode
 agar modul inti, plugin, dan layanan dapat berinteraksi secara
 konsisten.
 

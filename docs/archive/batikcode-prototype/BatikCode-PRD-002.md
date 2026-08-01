@@ -1,18 +1,18 @@
 # PRD-002 -- Market Research & Competitive Analysis
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
 Dokumen ini menganalisis lanskap IDE modern untuk mengidentifikasi
-peluang dan arah pengembangan DeskCode.
+peluang dan arah pengembangan BatikCode.
 
 ## 2. Kompetitor Utama
 
   -----------------------------------------------------------------------
   Produk            Kelebihan         Kekurangan        Peluang untuk
-                                                        DeskCode
+                                                        BatikCode
   ----------------- ----------------- ----------------- -----------------
   Visual Studio     Ekosistem         Bergantung pada   Pengalaman bawaan
   Code              ekstensi besar,   banyak ekstensi   yang lebih
@@ -67,7 +67,7 @@ peluang dan arah pengembangan DeskCode.
 
 ## 5. Target Positioning
 
-DeskCode diposisikan sebagai IDE modern yang: - Modular - Extensible -
+BatikCode diposisikan sebagai IDE modern yang: - Modular - Extensible -
 AI-ready - Cross-platform - Berorientasi pada pengembang
 
 ## 6. Diferensiasi Produk

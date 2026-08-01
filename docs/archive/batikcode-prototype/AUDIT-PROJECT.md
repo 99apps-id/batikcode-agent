@@ -1,4 +1,4 @@
-# Audit Proyek DeskCode terhadap PRD
+# Audit Proyek BatikCode terhadap PRD
 
 Tanggal audit: 29 Juli 2026  
 Ruang lingkup: PRD-001 s.d. PRD-014, source code, konfigurasi build/test/lint, dan preflight arsitektur IDE  
@@ -6,7 +6,7 @@ Mode: read-only terhadap kode aplikasi; `PRODUCT.md` ditambahkan sebagai konteks
 
 ## Putusan Eksekutif
 
-DeskCode saat ini adalah **prototype workbench yang dapat dibangun**, bukan IDE yang siap dipakai. Struktur visual dasar VS Code sudah dikenali—title bar, activity bar, sidebar, editor, bottom panel, status bar—tetapi banyak affordance menyatakan fitur yang tidak benar-benar tersedia. Sasaran “seperti VS Code 100%” tidak realistis bila DeskCode terus mengimplementasikan ulang workbench dari komponen React kecil. Untuk parity tinggi, fondasi produk perlu dipindahkan ke **fork Code - OSS** atau, bila diferensiasi dan branding lebih penting daripada parity literal, **Eclipse Theia**.
+BatikCode saat ini adalah **prototype workbench yang dapat dibangun**, bukan IDE yang siap dipakai. Struktur visual dasar VS Code sudah dikenali—title bar, activity bar, sidebar, editor, bottom panel, status bar—tetapi banyak affordance menyatakan fitur yang tidak benar-benar tersedia. Sasaran “seperti VS Code 100%” tidak realistis bila BatikCode terus mengimplementasikan ulang workbench dari komponen React kecil. Untuk parity tinggi, fondasi produk perlu dipindahkan ke **fork Code - OSS** atau, bila diferensiasi dan branding lebih penting daripada parity literal, **Eclipse Theia**.
 
 Status rilis: **NO-GO**.
 
@@ -161,7 +161,7 @@ Konsekuensi: tim harus sanggup melakukan upstream merge rutin; tidak boleh memak
 
 Theia adalah framework desktop/cloud IDE yang matang, Electron-ready, mendukung VS Code extension protocol, dan dapat dikustomisasi lebih dalam. Parity visual tidak akan 100%, tetapi biaya membangun workbench/extension host dari nol jauh lebih rendah.
 
-### Opsi C — Lanjutkan custom DeskCode (tidak direkomendasikan untuk target 100%)
+### Opsi C — Lanjutkan custom BatikCode (tidak direkomendasikan untuk target 100%)
 
 Masuk akal hanya jika tujuan diubah menjadi editor ringan dengan fitur terbatas dan UX sendiri. Monaco bukan VS Code workbench; package editor saja tidak menyediakan seluruh IDE.
 

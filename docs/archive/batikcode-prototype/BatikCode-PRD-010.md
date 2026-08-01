@@ -1,12 +1,12 @@
 # PRD-010 -- Release Engineering & Distribution
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
 Menetapkan proses build, packaging, distribusi, pembaruan, dan rilis
-DeskCode agar setiap versi dapat diterbitkan secara konsisten dan dapat
+BatikCode agar setiap versi dapat diterbitkan secara konsisten dan dapat
 ditelusuri.
 
 ## 2. Sasaran

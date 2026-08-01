@@ -1,12 +1,12 @@
 # PRD-009 -- Testing & Quality Assurance
 
-**Produk:** DeskCode IDE\
+**Produk:** BatikCode IDE\
 **Versi:** 0.1 Draft
 
 ## 1. Tujuan
 
 Menetapkan strategi pengujian dan jaminan kualitas agar setiap rilis
-DeskCode memenuhi standar fungsional, keamanan, performa, dan
+BatikCode memenuhi standar fungsional, keamanan, performa, dan
 stabilitas.
 
 ## 2. Sasaran
