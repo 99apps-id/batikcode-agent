@@ -15,7 +15,7 @@ const VIEW_ID = 'batikcode.pet.view';
  */
 const MOOD_SETTLE_MS = 700;
 
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	const provider = new PetViewProvider(context.extensionUri);
 	let settle: ReturnType<typeof setTimeout> | undefined;
 
@@ -30,6 +30,11 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.window.registerWebviewViewProvider(VIEW_ID, provider),
 		vscode.commands.registerCommand('batikcode.pet.choose', () => choosePet()),
 		vscode.commands.registerCommand('batikcode.pet.feed', () => provider.feed()),
+		// The companion lives in a panel container, and a panel container the
+		// workbench has never shown stays hidden from the tab bar — leaving no
+		// way to reach the pet at all. This is that way.
+		vscode.commands.registerCommand('batikcode.pet.show', () =>
+			vscode.commands.executeCommand('workbench.view.extension.batikcode-pet')),
 		vscode.workspace.onDidChangeConfiguration(event => {
 			if (event.affectsConfiguration('batikcode.pet')) {
 				provider.refresh();
@@ -41,6 +46,13 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.workspace.onDidSaveTextDocument(() => provider.celebrate()),
 		{ dispose: () => settle && clearTimeout(settle) }
 	);
+
+	// A webview provider is resolved lazily. Reveal the contributed view at
+	// startup so the pet is actually created without requiring the user to open
+	// its container first. Keep a disabled pet from changing the saved layout.
+	if (vscode.workspace.getConfiguration('batikcode.pet').get<boolean>('enabled', true)) {
+		await vscode.commands.executeCommand(`${VIEW_ID}.focus`);
+	}
 
 	provider.updateMood();
 }

@@ -42,6 +42,11 @@
     },
     "commands": [
       {
+        "command": "batikcode.pet.show",
+        "title": "Show Pet",
+        "category": "BatikCode Pet"
+      },
+      {
         "command": "batikcode.pet.choose",
         "title": "Choose Pet",
         "category": "BatikCode Pet",
