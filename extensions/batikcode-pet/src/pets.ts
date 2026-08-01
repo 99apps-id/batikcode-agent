@@ -125,3 +125,31 @@ export const SPECIES: readonly Species[] = [
 export function speciesById(id: string): Species {
 	return SPECIES.find(s => s.id === id) ?? SPECIES[0];
 }
+
+/**
+ * What the pet is reacting to. Derived from the diagnostics the language
+ * services already produce — the pet never parses code itself, so it stays
+ * correct for every language without knowing any of them.
+ */
+export type Mood = 'calm' | 'watching' | 'alert' | 'happy';
+
+export interface MoodState {
+	readonly mood: Mood;
+	readonly message: string;
+}
+
+export function moodFor(errors: number, warnings: number): MoodState {
+	if (errors > 0) {
+		return {
+			mood: 'alert',
+			message: errors === 1 ? '1 error' : `${errors} errors`
+		};
+	}
+	if (warnings > 0) {
+		return {
+			mood: 'watching',
+			message: warnings === 1 ? '1 warning' : `${warnings} warnings`
+		};
+	}
+	return { mood: 'calm', message: 'all clear' };
+}

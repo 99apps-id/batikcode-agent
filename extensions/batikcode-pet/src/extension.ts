@@ -4,12 +4,28 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { MotifId, MOTIFS, SPECIES, speciesById, SpeciesId } from './pets';
+import { MotifId, MOTIFS, moodFor, SPECIES, speciesById, SpeciesId } from './pets';
 
 const VIEW_ID = 'batikcode.pet.view';
 
+/**
+ * Diagnostics arrive in bursts while a language server catches up, and each one
+ * would otherwise repaint the pet. Settling first keeps it from flickering
+ * through moods on every keystroke.
+ */
+const MOOD_SETTLE_MS = 700;
+
 export function activate(context: vscode.ExtensionContext): void {
 	const provider = new PetViewProvider(context.extensionUri);
+	let settle: ReturnType<typeof setTimeout> | undefined;
+
+	const scheduleMoodUpdate = () => {
+		if (settle) {
+			clearTimeout(settle);
+		}
+		settle = setTimeout(() => provider.updateMood(), MOOD_SETTLE_MS);
+	};
+
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(VIEW_ID, provider),
 		vscode.commands.registerCommand('batikcode.pet.choose', () => choosePet()),
@@ -18,8 +34,31 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (event.affectsConfiguration('batikcode.pet')) {
 				provider.refresh();
 			}
-		})
+		}),
+		// The pet reads the diagnostics language services already publish rather
+		// than parsing anything itself, so it reacts correctly in every language.
+		vscode.languages.onDidChangeDiagnostics(scheduleMoodUpdate),
+		vscode.workspace.onDidSaveTextDocument(() => provider.celebrate()),
+		{ dispose: () => settle && clearTimeout(settle) }
 	);
+
+	provider.updateMood();
+}
+
+/** Totals every error and warning currently reported across the workspace. */
+function countDiagnostics(): { errors: number; warnings: number } {
+	let errors = 0;
+	let warnings = 0;
+	for (const [, diagnostics] of vscode.languages.getDiagnostics()) {
+		for (const diagnostic of diagnostics) {
+			if (diagnostic.severity === vscode.DiagnosticSeverity.Error) {
+				errors++;
+			} else if (diagnostic.severity === vscode.DiagnosticSeverity.Warning) {
+				warnings++;
+			}
+		}
+	}
+	return { errors, warnings };
 }
 
 async function choosePet(): Promise<void> {
@@ -55,6 +94,23 @@ class PetViewProvider implements vscode.WebviewViewProvider {
 		void this.view?.webview.postMessage({ type: 'feed' });
 	}
 
+	/** A save is worth a brief cheer, then the mood returns to the diagnostics. */
+	public celebrate(): void {
+		void this.view?.webview.postMessage({ type: 'feed' });
+	}
+
+	/**
+	 * Pushes the current mood without rebuilding the page, so the pet keeps its
+	 * position mid-stroll instead of restarting the walk on every diagnostic.
+	 */
+	public updateMood(): void {
+		if (!this.view) {
+			return;
+		}
+		const { errors, warnings } = countDiagnostics();
+		void this.view.webview.postMessage({ type: 'mood', ...moodFor(errors, warnings) });
+	}
+
 	public refresh(): void {
 		if (!this.view) {
 			return;
@@ -64,6 +120,8 @@ class PetViewProvider implements vscode.WebviewViewProvider {
 			configuration.get<SpeciesId>('species', 'komodo'),
 			configuration.get<MotifId>('motif', 'kawung')
 		);
+		// Replacing the html resets the page, so the mood has to be sent again.
+		this.updateMood();
 	}
 }
 
@@ -152,6 +210,27 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 		opacity: 0.65;
 	}
 
+	/* The mood line sits with the caption instead of over the pet: a bubble that
+	   follows a walking animal is unreadable, and this is meant to be glanced at. */
+	.mood {
+		position: absolute;
+		top: 26px;
+		left: 0;
+		right: 0;
+		text-align: center;
+		font-weight: 600;
+		transition: color 200ms ease-out;
+	}
+
+	body[data-mood="calm"] .mood { color: var(--vscode-descriptionForeground); }
+	body[data-mood="watching"] .mood { color: var(--vscode-editorWarning-foreground); }
+	body[data-mood="alert"] .mood { color: var(--vscode-editorError-foreground); }
+
+	/* Errors get a faster, tighter bob — the pet reads as agitated without any
+	   text having to say so. */
+	body[data-mood="alert"] .pet { animation-duration: 0.45s; }
+	body[data-mood="watching"] .pet { animation-duration: 0.8s; }
+
 	/* The pet is decoration; motion here carries no information, so it stops
 	   entirely rather than degrading. */
 	@media (prefers-reduced-motion: reduce) {
@@ -162,6 +241,7 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 </head>
 <body>
 	<div class="caption">${escapeHtml(species.label)} · ${escapeHtml(species.origin)}</div>
+	<div class="mood" id="mood" role="status" aria-live="polite"></div>
 	<div class="stage">
 		<div class="track">
 			<svg class="pet" viewBox="0 0 100 100" aria-label="${escapeHtml(species.label)}">
@@ -187,8 +267,15 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 		<rect width="240" height="34" fill="url(#groundMotif)"/>
 	</svg>
 	<script nonce="${nonce}">
+		const moodEl = document.getElementById('mood');
 		window.addEventListener('message', event => {
-			if (event.data?.type !== 'feed') { return; }
+			const data = event.data;
+			if (data?.type === 'mood') {
+				document.body.dataset.mood = data.mood;
+				moodEl.textContent = data.message;
+				return;
+			}
+			if (data?.type !== 'feed') { return; }
 			document.body.classList.remove('happy');
 			// Force a reflow so the animation restarts when fed twice in a row.
 			void document.body.offsetWidth;
