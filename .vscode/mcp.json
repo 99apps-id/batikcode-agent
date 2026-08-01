@@ -23,10 +23,6 @@
 				"--use-daemon",
 				"-vv"
 			]
-		},
-		"codebase-memory-mcp": {
-			"type": "stdio",
-			"command": "C:/Users/Iwan/.local/bin/codebase-memory-mcp.exe"
 		}
 	},
 	"inputs": []
