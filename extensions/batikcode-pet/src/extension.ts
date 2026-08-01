@@ -276,13 +276,17 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 			</svg>
 		</div>
 	</div>
-	<svg class="ground" viewBox="0 0 240 34" preserveAspectRatio="none" aria-hidden="true">
+	<!-- No viewBox: user units are CSS pixels, so the motif tiles across whatever
+	     width the panel happens to be and every tile keeps its true proportions.
+	     A fixed viewBox would either stop short of the right edge or stretch the
+	     kawung circles into ovals as the panel widens. -->
+	<svg class="ground" aria-hidden="true">
 		<defs>
 			<pattern id="groundMotif" width="24" height="24" patternUnits="userSpaceOnUse">
 				${motif.tile}
 			</pattern>
 		</defs>
-		<rect width="240" height="34" fill="url(#groundMotif)"/>
+		<rect width="100%" height="100%" fill="url(#groundMotif)"/>
 	</svg>
 	<script nonce="${nonce}">
 		const moodEl = document.getElementById('mood');
