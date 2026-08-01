@@ -6852,7 +6852,7 @@
         "canDelegate": true,
         "requiresCustomModels": true,
         "supportsAutoModel": false,
-        "requiresCopilotSignIn": true,
+        "requiresCopilotSignIn": false,
         "capabilities": {
           "supportsFileAttachments": true,
           "supportsImageAttachments": true
