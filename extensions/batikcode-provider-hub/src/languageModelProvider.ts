@@ -330,15 +330,21 @@ function modelCapabilities(
 		return { toolCalling: true, imageInput: true };
 	}
 	if (transport !== 'router') {
-		// Agent mode needs the provider to emit LanguageModelToolCallPart so the
-		// workbench can run the tool and feed the result back. The CLI transports
-		// only render tool descriptions into a text prompt and return prose, so
-		// they can never drive that loop — advertising tool calling here would put
-		// them in agent mode where they silently do nothing.
+		// The CLI transports cannot emit LanguageModelToolCallPart — they run an
+		// agent in a subprocess and return its prose. Declaring `toolCalling: false`
+		// to say so removed them from the picker entirely, in every mode, because
+		// the extension API has no way to express "no tool calls, but still offer
+		// me": `LanguageModelChatCapabilities` carries only `imageInput` and
+		// `toolCalling`, and the workbench derives `agentMode` from the latter.
+		//
+		// Being listed is worth more than the distinction. These CLIs do perform
+		// real work — Codex reads the workspace and reports back — so an agent-mode
+		// turn still returns a useful answer; what the workbench cannot show is the
+		// individual tool calls behind it.
 		const geminiVisionModels = /gemini.*vision|gemini.*pro.*vision|gemini.*1\.5.*pro/i;
 		const isGeminiVision = transport === 'gemini-cli' && geminiVisionModels.test(model);
 		return {
-			toolCalling: false,
+			toolCalling: true,
 			imageInput: isGeminiVision
 		};
 	}
