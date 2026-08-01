@@ -171,8 +171,12 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 	.ground {
 		position: absolute;
 		left: 0;
-		right: 0;
 		bottom: 0;
+		/* An <svg> is a replaced element, so an absolutely positioned one with
+		   width:auto takes its 300px intrinsic width and ignores right:0 — the
+		   batik stopped partway across the panel no matter how wide it got.
+		   Sizing it explicitly makes the canvas follow the panel. */
+		width: 100%;
 		height: 34px;
 		border-top: 1px solid var(--vscode-panel-border);
 		color: ${species.accent};
