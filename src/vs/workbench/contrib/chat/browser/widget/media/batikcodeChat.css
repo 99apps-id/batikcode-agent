@@ -60,3 +60,104 @@
 .interactive-session .interactive-item-container .header .username + .detail-container {
 	color: var(--vscode-descriptionForeground);
 }
+
+/* ══ Motion ═══════════════════════════════════════════════════════════════════
+ *
+ * The transcript list is virtualised: rows are recycled as you scroll, so an
+ * animation keyed to a row *appearing* replays every time that row scrolls back
+ * into view. Reading an old message would make it flash.
+ *
+ * So motion here is keyed to state, not to appearance:
+ *   - the agent rail breathes only while a response is streaming
+ *   - only the newest turn — a single element, `:last-child` — animates in
+ *   - everything else responds to hover or focus, which are inherently live
+ *
+ * Durations sit at 160–220ms: long enough to read as motion, short enough that a
+ * stray replay is not distracting.
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes batikcode-turn-rise {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes batikcode-bubble-settle {
+	from {
+		opacity: 0;
+		transform: translateY(4px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* The rail breathes rather than blinks: a slow opacity swing reads as "working"
+ * without pulling the eye off the text being written next to it. */
+@keyframes batikcode-rail-breathe {
+	0%, 100% { box-shadow: inset 2px 0 0 0 var(--vscode-textLink-foreground); }
+	50% { box-shadow: inset 3px 0 0 0 var(--vscode-focusBorder); }
+}
+
+.interactive-session:not(.chat-widget > .interactive-session) {
+
+	/* Agent, working. Keyed to the loading class, so it starts and stops with the
+	   actual request rather than with the row's position in the list. */
+	.interactive-item-container.interactive-response.chat-most-recent-response.chat-response-loading {
+		animation: batikcode-rail-breathe 1.8s ease-in-out infinite;
+	}
+
+	/* Agent, arriving. Only the newest response animates, and only once it has
+	   settled — while streaming, the rail above is already carrying the signal. */
+	.interactive-item-container.interactive-response:last-child:not(.chat-response-loading) {
+		animation: batikcode-turn-rise 200ms ease-out;
+	}
+
+	/* User, sending. The bubble settles into place instead of appearing flatly,
+	   which gives the send action a physical result. */
+	.interactive-item-container.interactive-request:last-child .value .rendered-markdown {
+		animation: batikcode-bubble-settle 160ms ease-out;
+	}
+
+	/* User, revisiting. A resting bubble lifts slightly under the pointer so an
+	   older message reads as something you can act on (edit, copy) rather than
+	   inert transcript. */
+	.interactive-item-container.interactive-request .value .rendered-markdown {
+		transition: box-shadow 160ms ease-out, transform 160ms ease-out;
+	}
+
+	.interactive-item-container.interactive-request:not(.editing):hover .value .rendered-markdown {
+		transform: translateY(-1px);
+		box-shadow:
+			inset -2px 0 0 0 var(--vscode-focusBorder),
+			0 2px 8px var(--vscode-widget-shadow, transparent);
+	}
+}
+
+/* Respect the OS setting. Everything above is decoration over information that
+ * is already conveyed by the rail's colour and the bubble's position, so there
+ * is nothing to preserve in a reduced-motion fallback. */
+@media (prefers-reduced-motion: reduce) {
+	.interactive-session:not(.chat-widget > .interactive-session) {
+
+		.interactive-item-container.interactive-response.chat-most-recent-response.chat-response-loading,
+		.interactive-item-container.interactive-response:last-child:not(.chat-response-loading),
+		.interactive-item-container.interactive-request:last-child .value .rendered-markdown {
+			animation: none;
+		}
+
+		.interactive-item-container.interactive-request .value .rendered-markdown {
+			transition: none;
+		}
+
+		.interactive-item-container.interactive-request:not(.editing):hover .value .rendered-markdown {
+			transform: none;
+		}
+	}
+}
