@@ -39,7 +39,10 @@ jobs:
       - name: Add Windows SDK to PATH (signtool for patchWin32DependenciesTask)
         shell: pwsh
         run: |
+          # The bin folder mixes architecture folders (arm, x64, x86) in with the
+          # versioned ones, and casting "arm" to [version] throws before sorting.
           $sdk = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory |
+            Where-Object { $_.Name -match '^\d+(\.\d+){1,3}$' } |
             Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
           if (-not $sdk) {
             throw "Windows SDK not found under C:\Program Files (x86)\Windows Kits\10\bin"
