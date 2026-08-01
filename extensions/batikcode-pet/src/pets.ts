@@ -90,20 +90,25 @@ export const SPECIES: readonly Species[] = [
 		coat: '#b4622f',
 		accent: '#6d3316',
 		pace: 7,
-		// Facing us, because the cheek flanges and the arm span are the whole
-		// point: arms longer than the body, reaching well past the knees.
+		// Facing us, because the two traits that name this animal only read from
+		// the front: a face far wider than it is tall from the cheek flanges, and
+		// arms that hang past the feet. The arms are held clear of a deliberately
+		// narrow torso — touching it, they merge into one blob and the span, which
+		// is the whole point, disappears.
 		body: `
-			<path d="M50 14 Q67 14 72 29 Q75 41 66 48 Q58 53 50 53 Q42 53 34 48 Q25 41 28 29 Q33 14 50 14 Z"/>
-			<path d="M50 48 Q65 51 69 64 Q72 77 64 86 L36 86 Q28 77 31 64 Q35 51 50 48 Z"/>
-			<path d="M33 51 Q19 56 17 71 Q16 83 24 90 L32 87 Q26 79 27 69 Q29 59 37 56 Z"/>
-			<path d="M67 51 Q81 56 83 71 Q84 83 76 90 L68 87 Q74 79 73 69 Q71 59 63 56 Z"/>
-			<ellipse cx="41" cy="88" rx="8" ry="4"/>
-			<ellipse cx="59" cy="88" rx="8" ry="4"/>`,
+			<path d="M50 10 Q72 10 79 24 Q83 34 76 41 Q66 48 50 48 Q34 48 24 41 Q17 34 21 24 Q28 10 50 10 Z"/>
+			<path d="M50 46 Q62 48 65 60 Q67 72 62 80 L38 80 Q33 72 35 60 Q38 48 50 46 Z"/>
+			<path d="M37 50 Q22 55 16 70 Q11 84 15 92 L23 90 Q20 80 24 70 Q29 58 40 55 Z"/>
+			<path d="M63 50 Q78 55 84 70 Q89 84 85 92 L77 90 Q80 80 76 70 Q71 58 60 55 Z"/>
+			<ellipse cx="19" cy="92" rx="6" ry="3.4"/>
+			<ellipse cx="81" cy="92" rx="6" ry="3.4"/>
+			<path d="M41 78 Q44 86 41 92 L34 92 Q37 85 35 78 Z"/>
+			<path d="M59 78 Q56 86 59 92 L66 92 Q63 85 65 78 Z"/>`,
 		features: `
-			<ellipse cx="50" cy="36" rx="12" ry="13" opacity="0.3"/>
-			<circle cx="44" cy="33" r="2.1"/>
-			<circle cx="56" cy="33" r="2.1"/>
-			<path d="M44 44 Q50 48 56 44" stroke-width="1.8" fill="none" stroke="currentColor" stroke-linecap="round"/>`
+			<ellipse cx="50" cy="30" rx="13" ry="15" opacity="0.32"/>
+			<circle cx="44" cy="26" r="2.2"/>
+			<circle cx="56" cy="26" r="2.2"/>
+			<path d="M45 39 Q50 43 55 39" stroke-width="1.9" fill="none" stroke="currentColor" stroke-linecap="round"/>`
 	},
 	{
 		id: 'cendrawasih',
@@ -112,22 +117,24 @@ export const SPECIES: readonly Species[] = [
 		coat: '#d8a12a',
 		accent: '#9a2f2f',
 		pace: 4,
-		// A small bird carrying an absurd tail: the plumes are longer than the
-		// bird and sweep clear of the body, which is the whole silhouette.
+		// A small bird carrying an absurd tail. Three things have to hold or it
+		// turns into a duck: a head much smaller than the body, a neck to carry
+		// it, and a slender beak level with the ground rather than tipped up.
 		body: `
-			<path d="M55 52 Q78 50 92 33 Q97 26 95 21 Q86 38 68 47 Q60 51 55 52 Z"/>
-			<path d="M56 58 Q80 60 95 49 Q100 45 99 40 Q89 53 69 59 Q61 61 56 58 Z"/>
-			<path d="M34 40 Q24 45 24 54 Q25 63 34 67 Q44 71 52 68 Q61 64 62 55 Q63 45 54 40 Q44 35 34 40 Z"/>
-			<path d="M33 43 Q24 34 27 25 Q32 16 41 17 Q49 19 49 28 Q49 36 42 41 Z"/>
-			<path d="M29 22 L12 26 L29 31 Z"/>
-			<path d="M40 60 Q52 58 58 52 Q54 63 42 66 Z"/>
-			<rect x="39" y="67" width="3.4" height="18" rx="1.7"/>
-			<rect x="50" y="67" width="3.4" height="18" rx="1.7"/>
-			<ellipse cx="40" cy="87" rx="7" ry="2.6"/>
-			<ellipse cx="51" cy="87" rx="7" ry="2.6"/>`,
+			<path d="M52 50 Q76 47 91 30 Q97 22 95 17 Q85 35 66 44 Q57 48 52 50 Z"/>
+			<path d="M54 56 Q78 57 94 45 Q100 40 99 35 Q88 50 67 56 Q59 58 54 56 Z"/>
+			<path d="M34 42 Q23 47 23 57 Q24 67 34 71 Q45 75 54 71 Q64 66 64 56 Q64 46 54 42 Q44 38 34 42 Z"/>
+			<path d="M36 45 Q30 38 31 30 Q32 24 37 23 Q42 24 42 31 Q42 39 42 44 Z"/>
+			<circle cx="37" cy="21" r="7.5"/>
+			<path d="M31 20 Q22 21 13 24 Q22 25 30 24 Z"/>
+			<path d="M42 62 Q54 59 60 52 Q56 65 44 68 Z"/>
+			<rect x="38" y="70" width="3.2" height="16" rx="1.6"/>
+			<rect x="49" y="70" width="3.2" height="16" rx="1.6"/>
+			<ellipse cx="39" cy="88" rx="6.5" ry="2.6"/>
+			<ellipse cx="50" cy="88" rx="6.5" ry="2.6"/>`,
 		features: `
-			<circle cx="35" cy="26" r="2.2"/>
-			<path d="M29 22 L12 26 L29 31 Z" opacity="0.55"/>`
+			<circle cx="39" cy="19" r="2"/>
+			<path d="M31 20 Q22 21 13 24 Q22 25 30 24 Z" opacity="0.6"/>`
 	},
 	{
 		id: 'harimau',
