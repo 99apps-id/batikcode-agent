@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Codicon } from '../../../base/common/codicons.js';
+import product from '../../../platform/product/common/product.js';
 import { getWindowId } from '../../../base/browser/dom.js';
 import { mainWindow } from '../../../base/browser/window.js';
 import { Schemas } from '../../../base/common/network.js';
@@ -37,8 +38,11 @@ export class OpenSessionInVSCodeAction extends Action2 {
 	constructor() {
 		super({
 			id: OpenSessionInVSCodeAction.ID,
-			title: localize2('openInVSCode', 'Open in Editor'),
-			icon: Codicon.vscodeInsiders,
+			// Named from the product rather than hardcoded, and carrying a neutral
+			// window icon: the Insiders codicon is Visual Studio Code's own mark,
+			// which misattributes the editor this button opens.
+			title: localize2('openInVSCode', 'Open in {0}', product.nameLong),
+			icon: Codicon.window,
 			precondition: ContextKeyExpr.and(IsAuxiliaryWindowContext.toNegated(), SessionsWelcomeVisibleContext.toNegated()),
 			menu: [{
 				id: Menus.TitleBarCenterRight,

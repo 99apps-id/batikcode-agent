@@ -69,6 +69,11 @@
     "configuration": {
       "title": "BatikCode Pet",
       "properties": {
+        "batikcode.pet.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the companion. When off, the pet stops animating and stops watching diagnostics."
+        },
         "batikcode.pet.species": {
           "type": "string",
           "default": "komodo",

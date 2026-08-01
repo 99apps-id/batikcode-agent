@@ -104,7 +104,9 @@ class PetViewProvider implements vscode.WebviewViewProvider {
 	 * position mid-stroll instead of restarting the walk on every diagnostic.
 	 */
 	public updateMood(): void {
-		if (!this.view) {
+		// Counting diagnostics is cheap but not free, and a disabled pet has
+		// nothing to show for it.
+		if (!this.view || !vscode.workspace.getConfiguration('batikcode.pet').get<boolean>('enabled', true)) {
 			return;
 		}
 		const { errors, warnings } = countDiagnostics();
@@ -116,6 +118,10 @@ class PetViewProvider implements vscode.WebviewViewProvider {
 			return;
 		}
 		const configuration = vscode.workspace.getConfiguration('batikcode.pet');
+		if (!configuration.get<boolean>('enabled', true)) {
+			this.view.webview.html = renderResting();
+			return;
+		}
 		this.view.webview.html = renderPet(
 			configuration.get<SpeciesId>('species', 'komodo'),
 			configuration.get<MotifId>('motif', 'kawung')
@@ -166,13 +172,21 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 	/* Two nested animations: the track carries the pet across the panel and
 	   flips it at each end, while the body bobs. Keeping them separate means the
 	   bob survives the horizontal flip instead of being mirrored with it. */
+	/* Position is driven from script rather than keyframes: walking, dragging and
+	   settling all read the same coordinate, so releasing the pet continues the
+	   walk from where it was dropped instead of snapping back onto a keyframe. */
 	.track {
 		position: absolute;
 		bottom: 18px;
+		left: 0;
 		width: 84px;
 		height: 84px;
-		animation: stroll ${species.pace}s linear infinite alternate;
+		cursor: grab;
+		touch-action: none;
 	}
+
+	.track.dragging { cursor: grabbing; }
+	.track.dragging .pet { animation: none; }
 
 	.pet {
 		width: 100%;
@@ -183,13 +197,6 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 	}
 
 	body.happy .pet { animation: cheer 0.5s ease-in-out 3; }
-
-	@keyframes stroll {
-		from { left: 4%; transform: scaleX(1); }
-		49.9% { transform: scaleX(1); }
-		50% { transform: scaleX(-1); }
-		to { left: calc(96% - 84px); transform: scaleX(-1); }
-	}
 
 	@keyframes bob {
 		0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -234,8 +241,7 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 	/* The pet is decoration; motion here carries no information, so it stops
 	   entirely rather than degrading. */
 	@media (prefers-reduced-motion: reduce) {
-		.track, .pet, body.happy .pet { animation: none; }
-		.track { left: 50%; margin-left: -42px; }
+		.pet, body.happy .pet { animation: none; }
 	}
 </style>
 </head>
@@ -268,6 +274,81 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 	</svg>
 	<script nonce="${nonce}">
 		const moodEl = document.getElementById('mood');
+		const track = document.querySelector('.track');
+		const pet = document.querySelector('.pet');
+		const SIZE = 84;
+		const GROUND = 18;
+		const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// Pixels per second. Species pace is the seconds a full crossing takes,
+		// so speed follows the panel width and stays consistent as it resizes.
+		const paceSeconds = ${species.pace};
+		let x = 12;
+		let y = GROUND;
+		let direction = 1;
+		let dragging = false;
+		let grabX = 0;
+		let grabY = 0;
+		let last = performance.now();
+
+		function maxX() { return Math.max(0, document.body.clientWidth - SIZE); }
+
+		function paint() {
+			track.style.left = x + 'px';
+			track.style.bottom = y + 'px';
+			// Flip by scaling the track, not the pet: the pet carries the bob, and
+			// mirroring that would tilt it the wrong way on the return leg.
+			track.style.transform = direction < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+		}
+
+		function frame(now) {
+			const dt = Math.min(0.05, (now - last) / 1000);
+			last = now;
+			if (!dragging && !reduced) {
+				const limit = maxX();
+				x += direction * (limit / paceSeconds) * dt;
+				if (x <= 0) { x = 0; direction = 1; }
+				else if (x >= limit) { x = limit; direction = -1; }
+				// Dropped above the ground: fall back to it rather than hovering.
+				if (y > GROUND) { y = Math.max(GROUND, y - 220 * dt); }
+			}
+			paint();
+			requestAnimationFrame(frame);
+		}
+
+		track.addEventListener('pointerdown', event => {
+			dragging = true;
+			track.classList.add('dragging');
+			track.setPointerCapture(event.pointerId);
+			grabX = event.clientX - x;
+			grabY = event.clientY - (document.body.clientHeight - y - SIZE);
+			event.preventDefault();
+		});
+
+		track.addEventListener('pointermove', event => {
+			if (!dragging) { return; }
+			x = Math.min(maxX(), Math.max(0, event.clientX - grabX));
+			const top = Math.min(document.body.clientHeight - SIZE, Math.max(0, event.clientY - grabY));
+			y = document.body.clientHeight - top - SIZE;
+			paint();
+		});
+
+		function endDrag(event) {
+			if (!dragging) { return; }
+			dragging = false;
+			track.classList.remove('dragging');
+			try { track.releasePointerCapture(event.pointerId); } catch { }
+			// Walk on from wherever it landed, heading away from the nearer wall.
+			direction = x < maxX() / 2 ? 1 : -1;
+			last = performance.now();
+		}
+
+		track.addEventListener('pointerup', endDrag);
+		track.addEventListener('pointercancel', endDrag);
+
+		paint();
+		requestAnimationFrame(frame);
+
 		window.addEventListener('message', event => {
 			const data = event.data;
 			if (data?.type === 'mood') {
@@ -283,6 +364,32 @@ function renderPet(speciesId: SpeciesId, motifId: MotifId): string {
 		});
 	</script>
 </body>
+</html>`;
+}
+
+/** Shown when the pet is switched off, so the panel explains itself. */
+function renderResting(): string {
+	return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+<style>
+	body {
+		margin: 0;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		background: var(--vscode-panel-background);
+		color: var(--vscode-descriptionForeground);
+		font-family: var(--vscode-font-family);
+		font-size: var(--vscode-font-size);
+	}
+</style>
+</head>
+<body>${escapeHtml('The pet is resting. Turn on batikcode.pet.enabled to bring it back.')}</body>
 </html>`;
 }
 
