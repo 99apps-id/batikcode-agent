@@ -541,7 +541,10 @@ export class TelegramBotController implements vscode.Disposable {
 					await this.safeSend(api, chatId, '🧹 Conversation history cleared. Starting fresh!');
 					break;
 				case 'models':
-					await this.safeSend(api, chatId, await this.ai.listAvailableModels(), false);
+					// Split: with every provider connected the catalogue runs to
+					// hundreds of entries, well past Telegram's 4096-character
+					// message limit, and a single send would simply be rejected.
+					await this.sendChunks(api, chatId, await this.ai.listAvailableModels());
 					break;
 				case 'model':
 					await this.safeSend(api, chatId, await this.handleModelSwitch(parsed.argument), false);
