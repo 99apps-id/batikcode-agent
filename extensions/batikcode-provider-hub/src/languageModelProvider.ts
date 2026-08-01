@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { materializeImagesForCli } from './cliImages';
 import { CloudCodeTurn, OAuthBootstrapId, OAuthCliBootstrap } from './oauthCliBootstrap';
 import { ProviderDefinition } from './providerCatalog';
 import { providerIdentity, ProviderTransport } from './providerIdentity';
@@ -153,20 +154,25 @@ export class BatikCodeLanguageModelProvider implements vscode.LanguageModelChatP
 				emittedToolCalls++;
 			}
 		} else {
-			const cliPrompt = asCliPrompt(
-				messagesWithIdentity,
-				options.tools?.map(tool => ({
-					name: tool.name,
-					description: tool.description,
-					inputSchema: tool.inputSchema ?? { type: 'object', properties: {} }
-				}))
-			);
-			text = await this.oauth.runChat(
-				model.transport,
-				selectedModelId,
-				cliPrompt,
-				token
-			);
+			const materialized = await materializeImagesForCli(messagesWithIdentity);
+			try {
+				const cliPrompt = asCliPrompt(
+					materialized.messages,
+					options.tools?.map(tool => ({
+						name: tool.name,
+						description: tool.description,
+						inputSchema: tool.inputSchema ?? { type: 'object', properties: {} }
+					}))
+				);
+				text = await this.oauth.runChat(
+					model.transport,
+					selectedModelId,
+					cliPrompt,
+					token
+				);
+			} finally {
+				await materialized.dispose();
+			}
 		}
 		if (!text && emittedToolCalls > 0) {
 			return;
@@ -341,11 +347,14 @@ function modelCapabilities(
 		// real work — Codex reads the workspace and reports back — so an agent-mode
 		// turn still returns a useful answer; what the workbench cannot show is the
 		// individual tool calls behind it.
-		const geminiVisionModels = /gemini.*vision|gemini.*pro.*vision|gemini.*1\.5.*pro/i;
-		const isGeminiVision = transport === 'gemini-cli' && geminiVisionModels.test(model);
+		// Images reach these transports as a file path the CLI can open, not as
+		// inline bytes, so every one of them can act on an attachment. Declaring
+		// `imageInput: false` made the workbench drop the image before the request
+		// was even built — the user saw a "Pasted Image" chip and the model saw
+		// nothing at all.
 		return {
 			toolCalling: true,
-			imageInput: isGeminiVision
+			imageInput: true
 		};
 	}
 	const protocol = provider.routing?.protocol;
@@ -446,11 +455,15 @@ function formatCliMessageContent(
 			return part.text ?? '';
 		}
 		if (part.type === 'image') {
-			return `[Image: ${part.mimeType ?? 'unknown'}, ${((part.data?.length ?? 0) * 0.75) | 0} bytes base64]`;
+			// Reached only if materializeImagesForCli could not write the file.
+			// Say the image was lost rather than describe it, so the CLI does not
+			// answer confidently about something it never saw.
+			return '[An image was attached but could not be made available to this CLI.]';
 		}
 		return '';
 	}).filter(Boolean).join('\n');
 }
+
 
 function formatFailureDetail(
 	model: BatikCodeModel,
