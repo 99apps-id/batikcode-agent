@@ -60,6 +60,16 @@ async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): 
 		shell: true,
 	};
 
+	// npm lockfiles can pin git dependencies as ssh://git@github.com/... even
+	// when package.json declared https://. CI runners on public forks do not have
+	// GitHub SSH keys, so force those clones through anonymous HTTPS instead.
+	finalOpts.env ??= {};
+	finalOpts.env['GIT_CONFIG_COUNT'] = '2';
+	finalOpts.env['GIT_CONFIG_KEY_0'] = 'url.https://github.com/.insteadof';
+	finalOpts.env['GIT_CONFIG_VALUE_0'] = 'ssh://git@github.com/';
+	finalOpts.env['GIT_CONFIG_KEY_1'] = 'url.https://github.com/.insteadof';
+	finalOpts.env['GIT_CONFIG_VALUE_1'] = 'git@github.com:';
+
 	const command = process.env['npm_command'] || 'install';
 
 	if (process.env['VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME'] && /^(.build\/distro\/npm\/)?remote$/.test(dir)) {
