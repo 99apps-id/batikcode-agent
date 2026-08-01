@@ -25,7 +25,7 @@
         {
           "id": "batikcode-pet",
           "title": "Pet",
-          "icon": "$(heart)"
+          "icon": "resources/pet.svg"
         }
       ]
     },
@@ -34,7 +34,9 @@
         {
           "type": "webview",
           "id": "batikcode.pet.view",
-          "name": "BatikCode Pet"
+          "name": "BatikCode Pet",
+          "icon": "resources/pet.svg",
+          "contextualTitle": "BatikCode Pet"
         }
       ]
     },
