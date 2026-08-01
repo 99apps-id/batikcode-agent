@@ -7,10 +7,10 @@
 ![screenshot](https://hediet-screenshots.azurewebsites.net/images/70c9ac164e5358815b96da4db49b7a4d661be4d57b797e282a459142634e3fd3)
 
 #### editor/codeEditor/CodeEditor/Dark
-![screenshot](https://hediet-screenshots.azurewebsites.net/images/af3df9d90346c8473e8576c2aab60a9cab514ed0a130a2208fa72851e4884852)
+![screenshot](https://hediet-screenshots.azurewebsites.net/images/d9a332f546063dd931838ecae34f3c80953ef01af40b5e915e42184e37bce5c0)
 
 #### editor/codeEditor/CodeEditor/Light
-![screenshot](https://hediet-screenshots.azurewebsites.net/images/62651503e0db22d7800352a848d4c6db4cdc56499fa40d5eac681958e9aea19a)
+![screenshot](https://hediet-screenshots.azurewebsites.net/images/c840a1cce95efeb773f5a45f0522945e27940cb333ba5e98d07af4a493779517)
 
 #### editor/inlineChatZoneWidget/InlineChatZoneWidget/Dark
 ![screenshot](https://hediet-screenshots.azurewebsites.net/images/a7b367873d69248568377a227d46be20b66947b1904367401c5938d940a08d4d)
