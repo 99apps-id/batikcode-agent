@@ -56,6 +56,7 @@ const compilations = [
 	'extensions/css-language-features/server/tsconfig.json',
 	'extensions/debug-auto-launch/tsconfig.json',
 	'extensions/debug-server-ready/tsconfig.json',
+	'extensions/batikcode-pet/tsconfig.json',
 	'extensions/batikcode-provider-hub/tsconfig.json',
 	'extensions/batikcode-remote-control/tsconfig.json',
 	'extensions/emmet/tsconfig.json',
