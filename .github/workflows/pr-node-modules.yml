@@ -156,7 +156,11 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-node-modules
 
+  # macOS Actions capacity is currently unavailable on this fork when billing
+  # is disabled. Keep the job definition, but only run it once the repository
+  # explicitly opts in via Actions variable BATIKCODE_ENABLE_MACOS_RUNNERS=true.
   macOS:
+    if: ${{ vars.BATIKCODE_ENABLE_MACOS_RUNNERS == 'true' }}
     name: macOS
     runs-on: macos-14-xlarge
     env:
