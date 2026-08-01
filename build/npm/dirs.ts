@@ -14,6 +14,11 @@ export const dirs = [
 	'build/rspack',
 	'build/vite',
 	'extensions',
+	// Runtime deps (ssh2, socks, simple-socks, ...). Without this entry the
+	// root postinstall never installs node_modules here and vsce.listFiles
+	// fails with ELSPROBLEMS during compile-non-native-extensions-build.
+	// Do not drop this from an unrelated commit (see 07d97ada regression).
+	'extensions/batikcode-remote-ssh',
 	'extensions/configuration-editing',
 	'extensions/copilot',
 	'extensions/css-language-features',

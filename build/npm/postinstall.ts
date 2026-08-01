@@ -88,11 +88,19 @@ async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): 
 		run('sudo', ['chown', '-R', `${userinfo.uid}:${userinfo.gid}`, `${path.resolve(root, dir)}`], syncOpts);
 	} else {
 		log(dir, 'Installing dependencies...');
-		const output = await spawnAsync(npm, command.split(' '), finalOpts);
-		if (output.trim()) {
-			for (const line of output.trim().split('\n')) {
-				log(dir, line);
+		try {
+			const output = await spawnAsync(npm, command.split(' '), finalOpts);
+			if (output.trim()) {
+				for (const line of output.trim().split('\n')) {
+					log(dir, line);
+				}
 			}
+		} catch (err) {
+			// Prefix the failing directory. Concurrent installs otherwise dump a
+			// bare "Process exited with code: 1" that cannot be attributed when
+			// npm itself printed little or nothing (common with git deps / gyp).
+			const detail = err instanceof Error ? err.message : String(err);
+			throw new Error(`[${dir}] ${detail}`);
 		}
 	}
 	removeParcelWatcherPrebuild(dir);

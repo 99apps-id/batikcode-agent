@@ -1,4 +1,4 @@
-# Server (REH) build on CI — where it stands
+﻿# Server (REH) build on CI — where it stands
 
 Working notes for `.github/workflows/build-server.yml`, which publishes the
 remote extension host that Remote-SSH installs on a server. Written as a handoff
@@ -21,71 +21,73 @@ The build runs on CI rather than a developer machine because it holds the whole
 compile in one Node heap. On a 13 GB laptop it either OOMs or takes the machine
 down; measured peaks were past 3.4 GB during mangling alone.
 
-## Current state: fails at `Install dependencies`
+## Current state (2026-08-01 audit)
 
-Both `linux-x64` and `linux-arm64` fail at the same step. Note this step
-**previously passed** — it is a regression, not an unsolved original problem.
+### Push CI on HEAD `096e71f4` (before audit fixes)
 
-The failure is inside the nested install that `build/npm/postinstall.ts` fans
-out to:
+| Workflow | Result | Root cause |
+|----------|--------|------------|
+| Monaco Editor checks | success | — |
+| Code OSS (node_modules) | failure | Linux job: `native-keymap` gyp — `pkg-config x11 xkbfile --libs` exit 1 (system `-dev` packages missing on that job) |
+| Component Fixtures | failure | `blocks-ci` screenshot hashes drifted after chat CSS motion (`07d97ada`) |
+| Build BatikCode Server (REH) | failure (last on `14426852`) | nested postinstall during root `npm ci` |
+
+### Silent regression (critical)
+
+1. `14426852` added `extensions/batikcode-remote-ssh` to `build/npm/dirs.ts` so its runtime deps install during root postinstall (needed for `vsce.listFiles` / ELSPROBLEMS).
+2. `07d97ada` (`feat(chat): … motion`) **removed that line again** with no mention in the commit message.
+3. Without the dirs entry, phase `compile-non-native-extensions-build` will hit ELSPROBLEMS for missing ssh2/socks/etc.
+
+**Fix in flight:** restore the dirs entry (with a comment so it is not dropped casually) and prefix nested install failures with `[dir]` in `build/npm/postinstall.ts` so concurrent logs are attributable.
+
+### Nested install failure diagnostics (run `30671312529`)
+
+When `batikcode-remote-ssh` was on the dirs list, logs showed only:
 
 ```
-[extensions/copilot] > tsx ./script/postinstall.ts
-[extensions/copilot] Creating symlinks for Claude session storage and instructions...
-[extensions/copilot] added 1128 packages
-Process exited with code: 1
+[extensions/batikcode-remote-ssh] Installing dependencies...
 ```
 
-So the failing script is `extensions/copilot/script/postinstall.ts`, run by
-that extension's own `postinstall` hook.
+then later a bare `Process exited with code: 1` with **no npm stdout/stderr** attributed to that folder (concurrency + empty capture). Do **not** treat interleaved `[extensions/copilot] … added 1128 packages` lines as proof that copilot's postinstall is the culprit — those lines can flush after another task already failed.
 
-### Leading suspect
-
-`extensions/copilot/script/postinstall.ts:120` throws hard:
-
-```ts
-throw new Error(`Could not find @github/copilot SDK files. Tried: ${...}`);
-```
-
-`@github/copilot` is a GitHub-scoped package. If it does not resolve on the
-runner — auth, platform, or optional-dependency reasons — this throw fails the
-whole root `npm ci`.
-
-A second, weaker suspect is the symlink step around line 263. It already guards
-Windows explicitly, so Linux CI is less likely to be the problem, but the log
-line prints immediately before the failure and should be ruled out.
-
-**Do not assume — read the full step log first:**
+How to read the next failure:
 
 ```bash
 gh run list --repo 99apps-id/batikcode --workflow "Build BatikCode Server (REH)" --limit 3
-gh run view <run-id> --repo 99apps-id/batikcode --json jobs \
-  --jq '.jobs[] | "\(.name): \(.conclusion)"'
-gh run view --repo 99apps-id/batikcode --job <job-id> --log | grep -n "npm error" | head
+gh run view --repo 99apps-id/batikcode --job <job-id> --log-failed | rg "Process exited|\\[extensions/|npm error|ELSPROBLEMS|gyp"
 ```
 
-### Promising direction
+After the postinstall logging fix, expect:
 
-The server package does not need copilot's SDK symlinks or its Claude session
-storage — it needs the compiled bundle. Options, cheapest first:
+```
+[extensions/<name>] Process exited with code: 1
+...
+```
 
-1. Skip that extension's postinstall for the server build (an env guard the
-   script already respects, or `--ignore-scripts` scoped to it).
-2. Make the throw at line 120 non-fatal when the SDK is absent, since the
-   pieces it wires up are test-harness conveniences.
-3. Drop `compile-copilot-extension-build` from the phase list and accept a
-   server without the bundled copilot extension.
+### Other open CI issues (not REH-only)
 
-Option 3 is the least desirable: it would reintroduce the original problem of a
-server whose built-ins do not match the client.
+- **pr-node-modules Linux job** lacked apt X11/xkbfile packages and did not run `node build/npm/preinstall.ts` before root `npm ci`. Also used `secrets.VSCODE_OSS` (empty on this fork) instead of `secrets.GITHUB_TOKEN`.
+- **Component fixtures**: update `test/componentFixtures/blocks-ci-screenshots.md` only if the chat motion CSS is intentional/final.
+- **copilot postinstall** (`Could not find @github/copilot SDK files`) remains a *possible* failure mode on runners without that package, but it is no longer the default diagnosis without a `[extensions/copilot]`-prefixed error.
+
+### Promising directions for REH install failures
+
+Cheapest first, after dirs + logging are restored:
+
+1. If failure is still silent/git-dep related: explicit workflow step  
+   `cd extensions/batikcode-remote-ssh && npm ci` with full log + `git config url.https://github.com/.insteadOf git@github.com:`.
+2. If copilot postinstall throws: env-guard or non-fatal missing SDK (test-harness only).
+3. Last resort: drop `compile-copilot-extension-build` (reintroduces mismatched remote built-ins — avoid).
 
 ## What is already fixed — do not re-litigate
 
 | Run | Failed at | Cause | Fix |
 |-----|-----------|-------|-----|
 | 1 | Checkout | `lfs: true`, but LFS objects were never pushed to this fork | `lfs: false`. All 97 LFS files are copilot simulation-test caches the server package excludes anyway. |
-| 2 | `npm ci` | Native modules build against Electron headers even for a server build | Added the same apt packages `pr-linux-test.yml` installs. |
-| 3 | Build server | Runner killed the job during `compile-src` | One phase per process, mangling skipped, swap added. |
+| 2 | `npm ci` | Native modules build against Electron headers even for a server build | Added the same apt packages `pr-linux-test.yml` installs; run `preinstall.ts` before root `npm ci`. |
+| 3 | Build server | Runner killed the job during `compile-src` | One phase per process, mangling skipped, heap 8192, swap on `/mnt/batikcode-swapfile`. |
+| 4 | `compile-src` TS | `welcomeOnboarding.contribution.ts` + `copilotSessionWrapper.ts` | Fixed in `0726b91e`. |
+| 5 | phase 2 ELSPROBLEMS | remote-ssh missing from `dirs.ts` | Added in `14426852` — **must stay**; re-check after any dirs.ts edit. |
 
 The phase list in the workflow replaces the all-in-one `vscode-reh-*` task:
 
