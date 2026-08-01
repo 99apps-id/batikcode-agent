@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import { normalizeModelSelection, TelegramAIChat } from './telegramAI';
 import { CodexTaskRunner } from './codexRunner';
 import { TelegramApi, TelegramApiError, TelegramMessage, TelegramUpdate, TelegramUser } from './telegramApi';
-import { parseUserIds, timingSafeTokenEquals } from './telegramSecurity';
+import { evaluatePairing, isAuthorizedTelegramUser, parseUserIds } from './telegramSecurity';
 
 const execFileAsync = promisify(execFile);
 const TOKEN_SECRET_KEY = 'batikcode.telegram.botToken';
@@ -507,7 +507,7 @@ export class TelegramBotController implements vscode.Disposable {
 		}
 
 		// Authorized commands — require a paired user in a private chat
-		if (message.chat.type !== 'private' || !userId || !this.allowedUserIds().includes(userId)) {
+		if (!isAuthorizedTelegramUser(message.chat.type, userId, this.allowedUserIds())) {
 			this.output.appendLine(`[telegram] rejected unauthorized user ${userId ?? 'unknown'} in ${message.chat.type} chat`);
 			await this.safeSend(api, chatId, [
 				'❌ You are not authorized to control this BatikCode instance.',
@@ -559,30 +559,31 @@ export class TelegramBotController implements vscode.Disposable {
 	}
 
 	private async handlePair(api: TelegramApi, message: TelegramMessage, argument: string): Promise<void> {
-		const challenge = this.pairingChallenge;
 		const chatId = String(message.chat.id);
 		const userId = message.from ? String(message.from.id) : undefined;
-		if (message.chat.type !== 'private' || !userId) {
-			this.output.appendLine(`[telegram] pair rejected: chat type ${message.chat.type}, user ${userId ?? 'missing'}`);
-			await this.safeSend(api, chatId, 'Pairing is allowed only in a private chat with this bot.');
+		const verdict = evaluatePairing(message.chat.type, userId, this.pairingChallenge, Date.now(), argument);
+		if (!verdict.ok) {
+			switch (verdict.reason) {
+				case 'not-private-chat':
+					this.output.appendLine(`[telegram] pair rejected: chat type ${message.chat.type}, user ${userId ?? 'missing'}`);
+					await this.safeSend(api, chatId, 'Pairing is allowed only in a private chat with this bot.');
+					break;
+				case 'no-challenge':
+					this.output.appendLine(`[telegram] pair rejected for user ${userId}: no active pairing challenge in BatikCode`);
+					await this.safeSend(api, chatId, 'No active pairing code in BatikCode. Generate a new code: Remote Explorer → Telegram → Pair Telegram User.');
+					break;
+				case 'expired':
+					this.output.appendLine(`[telegram] pair rejected for user ${userId}: pairing code expired`);
+					await this.safeSend(api, chatId, 'Pairing code expired. Generate a new code inside BatikCode and try again.');
+					break;
+				case 'code-mismatch':
+					this.output.appendLine(`[telegram] pair rejected for user ${userId}: pairing code mismatch`);
+					await this.safeSend(api, chatId, 'Pairing code is invalid. Copy the latest code from BatikCode and send it in this private chat.');
+					break;
+			}
 			return;
 		}
-		if (!challenge) {
-			this.output.appendLine(`[telegram] pair rejected for user ${userId}: no active pairing challenge in BatikCode`);
-			await this.safeSend(api, chatId, 'No active pairing code in BatikCode. Generate a new code: Remote Explorer → Telegram → Pair Telegram User.');
-			return;
-		}
-		if (challenge.expiresAt < Date.now()) {
-			this.output.appendLine(`[telegram] pair rejected for user ${userId}: pairing code expired`);
-			await this.safeSend(api, chatId, 'Pairing code expired. Generate a new code inside BatikCode and try again.');
-			return;
-		}
-		if (!timingSafeTokenEquals(argument.trim(), challenge.code)) {
-			this.output.appendLine(`[telegram] pair rejected for user ${userId}: pairing code mismatch`);
-			await this.safeSend(api, chatId, 'Pairing code is invalid. Copy the latest code from BatikCode and send it in this private chat.');
-			return;
-		}
-		const ids = [...new Set([...this.allowedUserIds(), userId])];
+		const ids = [...new Set([...this.allowedUserIds(), userId!])];
 		await this.context.globalState.update(ALLOWED_USERS_STATE_KEY, ids);
 		this.pairingChallenge = undefined;
 		this.refreshState();

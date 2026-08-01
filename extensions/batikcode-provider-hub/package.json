@@ -240,7 +240,7 @@
   "scripts": {
     "compile": "gulp compile-extension:batikcode-provider-hub",
     "watch": "gulp watch-extension:batikcode-provider-hub",
-    "test": "node --test out/test/providerProtocol.test.js"
+    "test": "node --test out/test/providerProtocol.test.js out/test/providerRouter.test.js"
   },
   "repository": {
     "type": "git",

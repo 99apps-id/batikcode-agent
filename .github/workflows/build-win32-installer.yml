@@ -1,0 +1,121 @@
+name: Build Windows Installer
+
+# Builds unsigned BatikCode Windows installers (system + user) from the
+# current branch and publishes them as workflow artifacts. Mirrors the win32
+# packaging flow in `build/azure-pipelines/win32/` (core-ci -> min-ci ->
+# inno-updater -> system/user setup) without Azure-specific signing or feeds.
+#
+# Usage:
+#   - Manual: run the workflow with the desired branch/tag.
+#   - Release: pushing a `v*` tag builds the installer for that tag.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-installer:
+    name: Windows (x64) Installer
+    runs-on: windows-2022
+    env:
+      NPM_ARCH: x64
+      VSCODE_ARCH: x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Add Windows SDK to PATH (signtool for patchWin32DependenciesTask)
+        shell: pwsh
+        run: |
+          $sdk = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory |
+            Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          if (-not $sdk) {
+            throw "Windows SDK not found under C:\Program Files (x86)\Windows Kits\10\bin"
+          }
+          $signtoolDir = Join-Path $sdk.FullName "x64"
+          if (-not (Test-Path (Join-Path $signtoolDir "signtool.exe"))) {
+            throw "signtool.exe not found under $signtoolDir"
+          }
+          echo "$signtoolDir" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          . build/azure-pipelines/win32/exec.ps1
+          $ErrorActionPreference = "Stop"
+          exec { node build/npm/preinstall.ts }
+          exec { npm ci }
+        env:
+          npm_config_arch: ${{ env.NPM_ARCH }}
+          npm_config_foreground_scripts: "true"
+          VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create .build folder
+        shell: pwsh
+        run: mkdir .build -ea 0
+
+      - name: Prepare built-in extensions cache key
+        shell: pwsh
+        run: node build/azure-pipelines/common/computeBuiltInDepsCacheKey.ts > .build/builtindepshash
+
+      - name: Restore built-in extensions cache
+        id: cache-builtin-extensions
+        uses: actions/cache/restore@v5
+        with:
+          enableCrossOsArchive: true
+          path: .build/builtInExtensions
+          key: "builtin-extensions-${{ hashFiles('.build/builtindepshash') }}"
+
+      - name: Download built-in extensions
+        if: steps.cache-builtin-extensions.outputs.cache-hit != 'true'
+        run: node build/lib/builtInExtensions.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile (core-ci)
+        shell: pwsh
+        run: npm run gulp core-ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package client (min-ci)
+        shell: pwsh
+        run: npm run gulp "vscode-win32-${{ env.VSCODE_ARCH }}-min-ci"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Inno Setup updater
+        shell: pwsh
+        run: npm run gulp "vscode-win32-${{ env.VSCODE_ARCH }}-inno-updater"
+
+      - name: Build system installer
+        shell: pwsh
+        run: npm run gulp "vscode-win32-${{ env.VSCODE_ARCH }}-system-setup"
+
+      - name: Build user installer
+        shell: pwsh
+        run: npm run gulp "vscode-win32-${{ env.VSCODE_ARCH }}-user-setup"
+
+      - name: Publish installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: batikcode-win32-x64-installers
+          if-no-files-found: error
+          path: |
+            .build/win32-x64/system-setup/*.exe
+            .build/win32-x64/user-setup/*.exe

@@ -1,0 +1,54 @@
+# BatikCode Private Open VSX Registry — Docker Compose
+#
+# Self-hosted Open VSX instance that BatikCode can point at by changing the
+# `extensionsGallery` block in `product.json`. The editor keeps the gallery
+# endpoint behind product.json (ADR 0001, decision 7), so switching between
+# the public open-vsx.org bootstrap and this private registry requires no
+# extension-management code changes.
+#
+# This is a single-node reference deployment for moderation, mirroring, and
+# controlled publishing. It is NOT a hardened production configuration: use
+# it as the starting point, then add TLS termination, authentication
+# enforcement, backups, and monitoring as required by your release process.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: openvsx
+      POSTGRES_USER: openvsx
+      POSTGRES_PASSWORD: ${OPENVSX_DB_PASSWORD:?set OPENVSX_DB_PASSWORD in .env}
+    volumes:
+      - openvsx-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openvsx -d openvsx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  openvsx:
+    image: ghcr.io/eclipse-openvsx/openvsx:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      OPENVSX_DB_HOST: db
+      OPENVSX_DB_PORT: "5432"
+      OPENVSX_DB_NAME: openvsx
+      OPENVSX_DB_USER: openvsx
+      OPENVSX_DB_PASSWORD: ${OPENVSX_DB_PASSWORD:?set OPENVSX_DB_PASSWORD in .env}
+      # The externally reachable base URL of this registry.
+      OPENVSX_ABSOLUTE_BASE_URL: ${OPENVSX_BASE_URL:-http://localhost:8081}
+      # Used for publishing VSIX files (the `openvsx-cli` publish command).
+      OPENVSX_PUBLISH_PASSWORD: ${OPENVSX_PUBLISH_PASSWORD:?set OPENVSX_PUBLISH_PASSWORD in .env}
+      # Storage backend: keep published VSIX files on a local volume here.
+      OPENVSX_STORAGE: file
+      OPENVSX_STORAGE_FILE_LOCATION: /opt/openvsx/storage
+    ports:
+      - "8081:8080"
+    volumes:
+      - openvsx-storage:/opt/openvsx/storage
+
+volumes:
+  openvsx-db-data:
+  openvsx-storage:

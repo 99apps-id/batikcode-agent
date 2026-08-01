@@ -4,6 +4,39 @@ BatikCode is currently developed privately by a small team. Contributions
 should preserve Code - OSS compatibility while making every BatikCode surface
 functional, secure, and testable.
 
+## Contributor onboarding
+
+New contributors should work through this checklist on their first change.
+
+1. **Set up** — Install Node.js `24.18.0` (see `.nvmrc`), run `npm install`,
+   and confirm `npm run typecheck-client` passes before touching code.
+   See [docs/development.md](docs/development.md) for the full dev loop.
+2. **Read the essentials** — skim [PRODUCT.md](PRODUCT.md),
+   [CONTEXT.md](CONTEXT.md), [docs/architecture.md](docs/architecture.md), and
+   [docs/feature-status.md](docs/feature-status.md). Most BatikCode-specific
+   surfaces live in built-in extensions under `extensions/` — look for an
+   existing extension or adapter seam before modifying the upstream workbench.
+3. **Scope a small task** — pick one self-contained problem, ideally one that
+   is already tracked in an issue. If none exists, open one first and reference
+   it in the PR description.
+4. **Follow the change rules** — the rules below apply to every change,
+   including branding, provider routing, remote tools, and distribution.
+5. **Add or update tests** — behavior changes ship with tests. Existing suites
+   use `node:test` (`extensions/*/src/test/*.test.ts`, run via
+   `npm test` inside each extension after compiling). Prefer extracting pure
+   functions for testability over mocking vscode APIs.
+6. **Run validation** — run the checks in the Validation section below,
+   including `git diff --check`, before opening the PR.
+7. **Open the PR** — keep the diff focused, describe the change and the issue
+   it fixes, and wait for review. BatikCode commits are gated by the pre-commit
+   and commit-msg hooks; never bypass them. Branches that target
+   `release/msrc/*` must contain exactly one commit carrying a numeric
+   `Msrc-Case-Id:` trailer (enforced by CI).
+
+The small-team context means every contributor should be able to pick up any
+area. If you notice an area only you understand, document it in the relevant
+extension folder or in `docs/` rather than keeping it in your head.
+
 ## Before changing code
 
 Read:

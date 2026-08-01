@@ -87,6 +87,7 @@
     "compile-web": "node esbuild.browser.mts",
     "watch": "gulp watch-extension:github-authentication",
     "watch-web": "node esbuild.browser.mts --watch",
+    "test": "node --test out/test/config.test.js",
     "vscode:prepublish": "npm run compile"
   },
   "dependencies": {
