@@ -102,6 +102,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # TEMPORARY diagnostic: isolates the batikcode-remote-ssh sub-install that
+      # has been failing silently inside the root postinstall (all 13 runs so far
+      # died at "Install dependencies" with no output). Runs standalone with
+      # verbose npm logging so the real error surfaces in ~3 minutes instead of
+      # waiting for the full root install. Remove once the cause is fixed.
+      - name: Debug remote-ssh deps (temporary)
+        run: |
+          set -e
+          source ./build/azure-pipelines/linux/setup-env.sh
+          export GIT_CONFIG_COUNT=2
+          export GIT_CONFIG_KEY_0="url.https://github.com/.insteadof"
+          export GIT_CONFIG_VALUE_0="ssh://git@github.com/"
+          export GIT_CONFIG_KEY_1="url.https://github.com/.insteadof"
+          export GIT_CONFIG_VALUE_1="git@github.com:"
+          cd extensions/batikcode-remote-ssh
+          npm ci --loglevel verbose --no-audit --no-fund 2>&1 | tail -100
+
       - name: Install dependencies
         run: |
           set -e
@@ -125,6 +142,8 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           ONNXRUNTIME_NODE_INSTALL: skip
+          # TEMPORARY: verbose sub-installs expose the silent remote-ssh failure.
+          NPM_CONFIG_LOGLEVEL: verbose
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add swap space
