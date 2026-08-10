@@ -219,18 +219,6 @@ export class OAuthCliBootstrap {
 						: `Google OAuth token stored${tokens.refreshToken ? ' with automatic refresh' : ' without a refresh token'}.`
 				};
 			}
-			// For gemini-cli, also fall back to API key if no OAuth token.
-			if (id === 'gemini-cli') {
-				const key = await this.getGeminiApiKey();
-				if (key) {
-					return {
-						available: true,
-						connected: true,
-						label: 'API key configured',
-						detail: 'Gemini API key is configured in the router.'
-					};
-				}
-			}
 			return {
 				available: true,
 				connected: false,
