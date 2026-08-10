@@ -9,10 +9,11 @@ import { IProcessEnvironment, isMacintosh } from '../../../base/common/platform.
 import { URI } from '../../../base/common/uri.js';
 import { whenDeleted } from '../../../base/node/pfs.js';
 import { IConfigurationService } from '../../configuration/common/configuration.js';
-import { NativeParsedArgs } from '../../environment/common/argv.js';
+import { getAgentsFolderUri, NativeParsedArgs } from '../../environment/common/argv.js';
 import { isLaunchedFromCli } from '../../environment/node/argvHelper.js';
 import { createDecorator } from '../../instantiation/common/instantiation.js';
 import { ILogService } from '../../log/common/log.js';
+import { IProductService } from '../../product/common/productService.js';
 import { IURLService } from '../../url/common/url.js';
 import { ICodeWindow } from '../../window/electron-main/window.js';
 import { IWindowSettings } from '../../window/common/window.js';
@@ -45,6 +46,7 @@ export class LaunchMainService implements ILaunchMainService {
 		@IWindowsMainService private readonly windowsMainService: IWindowsMainService,
 		@IURLService private readonly urlService: IURLService,
 		@IConfigurationService private readonly configurationService: IConfigurationService,
+		@IProductService private readonly productService: IProductService,
 	) { }
 
 	async start(args: NativeParsedArgs, userEnv: IProcessEnvironment): Promise<void> {
@@ -70,7 +72,10 @@ export class LaunchMainService implements ILaunchMainService {
 
 			// Create a window if there is none
 			if (this.windowsMainService.getWindowCount() === 0) {
-				const window = (await this.windowsMainService.openEmptyWindow({ context: OpenContext.DESKTOP })).at(0);
+				const windows = this.productService.agentOnly
+					? await this.windowsMainService.openAgentsWindow({ context: OpenContext.DESKTOP, cli: args }, getAgentsFolderUri(args))
+					: await this.windowsMainService.openEmptyWindow({ context: OpenContext.DESKTOP });
+				const window = windows.at(0);
 				if (window) {
 					whenWindowReady = window.ready();
 				}
@@ -144,8 +149,8 @@ export class LaunchMainService implements ILaunchMainService {
 		}
 
 		// Agents window
-		else if (args['agents']) {
-			usedWindows = await this.windowsMainService.openAgentsWindow(baseConfig);
+		else if (args['agents'] || this.productService.agentOnly) {
+			usedWindows = await this.windowsMainService.openAgentsWindow(baseConfig, getAgentsFolderUri(args));
 		}
 
 		// Start without file/folder arguments

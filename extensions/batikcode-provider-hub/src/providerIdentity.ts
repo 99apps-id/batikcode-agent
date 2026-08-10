@@ -12,7 +12,7 @@ export function providerIdentity(providerName: string, transport: ProviderTransp
 			? 'the authenticated OpenAI Codex CLI'
 			: transport === 'antigravity'
 				? 'Antigravity (Google Cloud Code)'
-				: 'the authenticated Google Gemini CLI';
+				: 'Google Gemini CLI Cloud Code OAuth';
 	return `You are an AI assistant in BatikCode using ${runtime} with model "${modelId}". `
 		+ 'When asked about your identity, state this provider, model, and transport accurately. '
 		+ 'Do not claim to use GitHub Copilot or Copilot CLI unless the active transport is actually GitHub Copilot CLI.';

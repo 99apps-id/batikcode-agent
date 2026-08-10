@@ -100,6 +100,8 @@ export interface IProductConfiguration {
 	readonly win32VersionedUpdate?: boolean;
 	readonly win32ContextMenu?: { readonly [arch: string]: { readonly clsid: string } };
 	readonly applicationName: string;
+	/** Launch only the standalone Agent workbench instead of the IDE workbench. */
+	readonly agentOnly?: boolean;
 	readonly embedderIdentifier?: string;
 	readonly agentsTelemetryAppName?: string;
 
