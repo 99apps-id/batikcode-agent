@@ -58,8 +58,25 @@ async function isExpectedElectronInstalled(): Promise<boolean> {
 }
 
 async function ensureCompiled() {
-	if (!(await exists('out'))) {
-		await runProcess(npm, ['run', 'compile']);
+	// A client-only transpile leaves `out/` behind but does not build the
+	// built-in extensions. Starting from that state used to produce a working
+	// window with extension activation failures as soon as a supported file was
+	// opened. Keep the development launcher honest by checking the extension
+	// entrypoints that back the Agent's core editing and provider workflows.
+	const requiredOutputs = [
+		'out',
+		'extensions/batikcode-provider-hub/out/extension.js',
+		'extensions/github/out/extension.js',
+		'extensions/html-language-features/client/out/node/htmlClientMain.js',
+		'extensions/json-language-features/client/out/node/jsonClientMain.js',
+		'extensions/markdown-language-features/out/extension.js',
+		'extensions/npm/out/npmMain.js',
+		'extensions/simple-browser/out/extension.js',
+		'extensions/typescript-language-features/out/extension.js',
+	];
+
+	if (!(await Promise.all(requiredOutputs.map(exists))).every(Boolean)) {
+		await runProcess(npm, ['run', 'build-fast']);
 	}
 }
 

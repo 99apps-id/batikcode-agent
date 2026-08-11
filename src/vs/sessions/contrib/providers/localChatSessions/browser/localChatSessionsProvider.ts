@@ -412,7 +412,10 @@ export class LocalChatSessionsProvider extends Disposable implements ISessionsPr
 	readonly id = LOCAL_PROVIDER_ID;
 	readonly label = localize('localChatSessionsProvider', "Copilot Chat");
 	readonly icon = Codicon.vm;
-	readonly order = 0;
+	// Keep the provider first for a new Agent session. Local chat exposes the
+	// general language-model pool, including configured BYOK and OAuth models,
+	// while Copilot-specific sessions require a separate sign-in.
+	readonly order = -1;
 	readonly browseActions: readonly [] = [];
 	readonly supportsLocalWorkspaces = true;
 
