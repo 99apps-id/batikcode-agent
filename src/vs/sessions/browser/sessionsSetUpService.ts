@@ -99,7 +99,11 @@ class SessionsSetUpWidget extends Disposable {
 			return;
 		}
 
-		if (shouldSkipSessionsWelcome(this.environmentService)) {
+		// BatikCode Agent is a standalone, provider-agnostic chat editor. It
+		// must remain usable before GitHub sign-in so users can choose a BYOK
+		// model or one of the supported OAuth providers from Provider Hub.
+		// The regular BatikCode IDE keeps the upstream welcome/sign-in flow.
+		if (this.productService.agentOnly || shouldSkipSessionsWelcome(this.environmentService)) {
 			this.onCompleted();
 			return;
 		}
